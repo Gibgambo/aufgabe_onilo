@@ -113,3 +113,17 @@ export async function listRecordings(videoId?: string): Promise<RecordingRecord[
     }
     return db.getAll("recordings");
 }
+
+export type RecordingUpdate = Partial<Pick<RecordingRecord, "status" | "rating" | "comment">>;
+
+export async function updateRecording(
+    recordingId: string,
+    updates: RecordingUpdate,
+): Promise<void> {
+    const db = await getDb();
+    const existing = await db.get("recordings", recordingId);
+    if (!existing) {
+        throw new Error(`Recording ${recordingId} existiert nicht`);
+    }
+    await db.put("recordings", { ...existing, ...updates });
+}
