@@ -139,6 +139,10 @@ export function Player() {
         <StatusMessage text="Diese Boardstory wurde nicht gefunden." />
       )}
 
+      {state.status === "error" && (
+        <StatusMessage text="Die Boardstory konnte nicht geladen werden. Bitte versuche es erneut." />
+      )}
+
       {state.status === "ready" && (
         <MediaPlayer
           src={{ src: state.videoUrl, type: state.mimeType as VideoMimeType }}
