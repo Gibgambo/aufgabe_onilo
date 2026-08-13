@@ -1,7 +1,7 @@
 // @vitest-environment node
 // node als Testumgebung anstatt jsdom, da jsdom keine blob Klasse supportet
 import { describe, expect, it } from "vitest";
-import { validateUpload, saveVideo, loadVideo } from "./db";
+import { validateUpload, saveVideo, loadVideo, saveRecording, listRecordings } from "./db";
 
 
 function makeFile(type: string, sizeBytes: number): File {
@@ -57,5 +57,54 @@ describe("saveVideo / loadVideo", () => {
         const idA = await saveVideo({ name: "A", mimeType: "video/mp4", blob, cuePoints: [] });
         const idB = await saveVideo({ name: "B", mimeType: "video/mp4", blob, cuePoints: [] });
         expect(idA).not.toBe(idB);
+    });
+});
+
+describe("saveRecording / listRecordings", () => {
+    it("speichert ein Recording mit den korrekten Default-Werten", async () => {
+        const videoId = await saveVideo({
+            name: "Boardstory für Recording-Test",
+            mimeType: "video/mp4",
+            blob: new Blob(["video"], { type: "video/mp4" }),
+            cuePoints: [0],
+        });
+        const blob = new Blob(["audio"], { type: "audio/webm" });
+
+        const recordingId = await saveRecording({
+            videoId,
+            studentName: "Tim",
+            blob,
+        });
+
+        const all = await listRecordings();
+        const saved = all.find((r) => r.recordingId === recordingId);
+
+        expect(saved).toBeDefined();
+        expect(saved?.studentName).toBe("Tim");
+        expect(saved?.status).toBe("unbewertet");
+        expect(saved?.rating).toBeNull();
+        expect(saved?.comment).toBeNull();
+    });
+
+    it("filtert listRecordings nach videoId", async () => {
+        const videoIdA = await saveVideo({
+            name: "Video A",
+            mimeType: "video/mp4",
+            blob: new Blob(["a"], { type: "video/mp4" }),
+            cuePoints: [0],
+        });
+        const videoIdB = await saveVideo({
+            name: "Video B",
+            mimeType: "video/mp4",
+            blob: new Blob(["b"], { type: "video/mp4" }),
+            cuePoints: [0],
+        });
+        await saveRecording({ videoId: videoIdA, studentName: "Anna", blob: new Blob(["x"]) });
+        await saveRecording({ videoId: videoIdB, studentName: "Ben", blob: new Blob(["y"]) });
+
+        const recordingsForA = await listRecordings(videoIdA);
+
+        expect(recordingsForA).toHaveLength(1);
+        expect(recordingsForA[0].studentName).toBe("Anna");
     });
 });

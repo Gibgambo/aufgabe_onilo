@@ -84,3 +84,32 @@ export async function loadVideo(videoId: string): Promise<VideoRecord | undefine
     const db = await getDb();
     return db.get("videos", videoId);
 }
+
+export interface RecordingInput {
+    videoId: string;
+    studentName: string;
+    blob: Blob;
+}
+
+export async function saveRecording(input: RecordingInput): Promise<string> {
+    const recordingId = crypto.randomUUID();
+    const db = await getDb();
+    await db.put("recordings", {
+        recordingId,
+        videoId: input.videoId,
+        studentName: input.studentName,
+        blob: input.blob,
+        status: "unbewertet",
+        rating: null,
+        comment: null,
+    });
+    return recordingId;
+}
+
+export async function listRecordings(videoId?: string): Promise<RecordingRecord[]> {
+    const db = await getDb();
+    if (videoId) {
+        return db.getAllFromIndex("recordings", "videoId", videoId);
+    }
+    return db.getAll("recordings");
+}
