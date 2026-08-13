@@ -1,10 +1,15 @@
 import { useState } from "react";
-import { validateUpload } from "../persistence/db";
+import { useNavigate } from "react-router";
+import { validateUpload, saveVideo } from "../persistence/db";
+import { generateCuePoints } from "../domain/cuePoints";
+import { getVideoDuration } from "../editor/videoDuration";
 
 export function Editor() {
   const [error, setError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const navigate = useNavigate();
 
-  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) {
       return;
@@ -17,6 +22,24 @@ export function Editor() {
     }
 
     setError(null);
+    setIsUploading(true);
+
+    try {
+      const duration = await getVideoDuration(file);
+      const cuePoints = generateCuePoints(duration);
+      const videoId = await saveVideo({
+        name: file.name,
+        mimeType: file.type,
+        blob: file,
+        cuePoints,
+      });
+      navigate(`/player/${videoId}`);
+    } catch {
+      setError(
+        "Die Boardstory konnte nicht hochgeladen werden. Bitte versuche es erneut.",
+      );
+      setIsUploading(false);
+    }
   }
 
   return (
@@ -32,8 +55,14 @@ export function Editor() {
           accept="video/mp4,video/webm"
           onChange={handleFileChange}
           className="hidden"
+          disabled={isUploading}
         />
       </label>
+      {isUploading && (
+        <p role="status" className="text-onilo-primary text-lg font-medium">
+          Boardstory wird hochgeladen…
+        </p>
+      )}
       {error && (
         <p role="alert" className="text-onilo-accent text-lg font-medium">
           {error}
