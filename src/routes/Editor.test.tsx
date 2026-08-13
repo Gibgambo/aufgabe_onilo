@@ -98,9 +98,13 @@ describe("Editor – Upload-Flow", () => {
   });
 
   it("zeigt eine Fehlermeldung und navigiert nicht, wenn der Upload fehlschlägt", async () => {
+    const uploadError = new Error("Quota exceeded");
     vi.spyOn(uploadBoardstoryModule, "uploadBoardstory").mockRejectedValue(
-      new Error("Quota exceeded"),
+      uploadError,
     );
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const user = userEvent.setup({ applyAccept: false });
 
     renderEditor();
@@ -109,5 +113,9 @@ describe("Editor – Upload-Flow", () => {
 
     expect(await screen.findByRole("alert")).toBeInTheDocument();
     expect(screen.queryByText("Player-Seite")).not.toBeInTheDocument();
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Boardstory-Upload fehlgeschlagen",
+      uploadError,
+    );
   });
 });

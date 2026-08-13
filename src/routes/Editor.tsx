@@ -26,7 +26,8 @@ export function Editor() {
     try {
       const videoId = await uploadBoardstory(file);
       navigate(`/player/${videoId}`);
-    } catch {
+    } catch (uploadError) {
+      console.error("Boardstory-Upload fehlgeschlagen", uploadError);
       setError(
         "Die Boardstory konnte nicht hochgeladen werden. Bitte versuche es erneut.",
       );
