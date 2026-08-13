@@ -31,6 +31,10 @@ describe("findNextCuePoint", () => {
     it("bleibt beim letzten Cue-Point, wenn currentTime nach dem letzten liegt", () => {
         expect(findNextCuePoint(cues, 80)).toBe(75);
     });
+
+    it("wirft einen Fehler bei leerem cues-Array", () => {
+        expect(() => findNextCuePoint([], 10)).toThrow();
+    });
 });
 
 describe("findPreviousCuePoint", () => {
@@ -47,5 +51,9 @@ describe("findPreviousCuePoint", () => {
 
     it("bleibt beim ersten Cue-Point, wenn currentTime vor dem ersten liegt", () => {
         expect(findPreviousCuePoint([25, 50, 75], 10)).toBe(25);
+    });
+
+    it("wirft einen Fehler bei leerem cues-Array", () => {
+        expect(() => findPreviousCuePoint([], 10)).toThrow();
     });
 });
