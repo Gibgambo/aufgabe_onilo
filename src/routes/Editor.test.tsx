@@ -3,8 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Editor } from "./Editor";
-import * as db from "../persistence/db";
-import * as videoDuration from "../editor/videoDuration";
+import * as uploadBoardstoryModule from "../editor/uploadBoardstory";
 
 function makeFile(name: string, type: string): File {
   return new File(["fake-content"], name, { type });
@@ -62,32 +61,28 @@ describe("Editor – Upload-Flow", () => {
     vi.restoreAllMocks();
   });
 
-  it("speichert das Video mit Cue-Points und navigiert zum Player", async () => {
-    vi.spyOn(videoDuration, "getVideoDuration").mockResolvedValue(100);
-    vi.spyOn(db, "saveVideo").mockResolvedValue("video-123");
+  it("navigiert zum Player, sobald uploadBoardstory eine videoId liefert", async () => {
+    vi.spyOn(uploadBoardstoryModule, "uploadBoardstory").mockResolvedValue(
+      "video-123",
+    );
     const user = userEvent.setup({ applyAccept: false });
+    const file = makeFile("boardstory.mp4", "video/mp4");
 
     renderEditor();
     const input = screen.getByLabelText("Boardstory hochladen");
-    await user.upload(input, makeFile("boardstory.mp4", "video/mp4"));
+    await user.upload(input, file);
 
     expect(await screen.findByText("Player-Seite")).toBeInTheDocument();
-    expect(db.saveVideo).toHaveBeenCalledWith({
-      name: "boardstory.mp4",
-      mimeType: "video/mp4",
-      blob: expect.any(File),
-      cuePoints: [0, 25, 50, 75],
-    });
+    expect(uploadBoardstoryModule.uploadBoardstory).toHaveBeenCalledWith(file);
   });
 
   it("zeigt einen Ladezustand, während der Upload läuft", async () => {
-    let resolveDuration: (value: number) => void = () => {};
-    vi.spyOn(videoDuration, "getVideoDuration").mockReturnValue(
+    let resolveUpload: (videoId: string) => void = () => {};
+    vi.spyOn(uploadBoardstoryModule, "uploadBoardstory").mockReturnValue(
       new Promise((resolve) => {
-        resolveDuration = resolve;
+        resolveUpload = resolve;
       }),
     );
-    vi.spyOn(db, "saveVideo").mockResolvedValue("video-123");
     const user = userEvent.setup({ applyAccept: false });
 
     renderEditor();
@@ -98,27 +93,14 @@ describe("Editor – Upload-Flow", () => {
       "wird hochgeladen",
     );
 
-    resolveDuration(50);
+    resolveUpload("video-123");
     expect(await screen.findByText("Player-Seite")).toBeInTheDocument();
   });
 
-  it("zeigt eine Fehlermeldung und navigiert nicht, wenn die Videodauer nicht ermittelt werden kann", async () => {
-    vi.spyOn(videoDuration, "getVideoDuration").mockRejectedValue(
-      new Error("Videodauer konnte nicht ermittelt werden"),
+  it("zeigt eine Fehlermeldung und navigiert nicht, wenn der Upload fehlschlägt", async () => {
+    vi.spyOn(uploadBoardstoryModule, "uploadBoardstory").mockRejectedValue(
+      new Error("Quota exceeded"),
     );
-    const user = userEvent.setup({ applyAccept: false });
-
-    renderEditor();
-    const input = screen.getByLabelText("Boardstory hochladen");
-    await user.upload(input, makeFile("boardstory.mp4", "video/mp4"));
-
-    expect(await screen.findByRole("alert")).toBeInTheDocument();
-    expect(screen.queryByText("Player-Seite")).not.toBeInTheDocument();
-  });
-
-  it("zeigt eine Fehlermeldung und navigiert nicht, wenn das Speichern fehlschlägt", async () => {
-    vi.spyOn(videoDuration, "getVideoDuration").mockResolvedValue(100);
-    vi.spyOn(db, "saveVideo").mockRejectedValue(new Error("Quota exceeded"));
     const user = userEvent.setup({ applyAccept: false });
 
     renderEditor();

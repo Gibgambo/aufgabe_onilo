@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { validateUpload, saveVideo } from "../persistence/db";
-import { generateCuePoints } from "../domain/cuePoints";
-import { getVideoDuration } from "../editor/videoDuration";
+import { validateUpload } from "../persistence/db";
+import { uploadBoardstory } from "../editor/uploadBoardstory";
 
 export function Editor() {
   const [error, setError] = useState<string | null>(null);
@@ -25,14 +24,7 @@ export function Editor() {
     setIsUploading(true);
 
     try {
-      const duration = await getVideoDuration(file);
-      const cuePoints = generateCuePoints(duration);
-      const videoId = await saveVideo({
-        name: file.name,
-        mimeType: file.type,
-        blob: file,
-        cuePoints,
-      });
+      const videoId = await uploadBoardstory(file);
       navigate(`/player/${videoId}`);
     } catch {
       setError(
@@ -47,7 +39,7 @@ export function Editor() {
       <h1 className="text-onilo-primary text-3xl font-bold">Editor</h1>
       <label
         className="bg-onilo-primary hover:bg-onilo-secondary text-white text-xl font-semibold px-8 py-4
-  rounded-xl cursor-pointer"
+    rounded-xl cursor-pointer"
       >
         Boardstory hochladen
         <input
