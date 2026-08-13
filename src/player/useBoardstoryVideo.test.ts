@@ -74,4 +74,20 @@ describe("useBoardstoryVideo", () => {
 
     expect(revokeObjectUrlSpy).toHaveBeenCalledWith("blob:mock-url");
   });
+
+  it("loggt den Fehler und liefert den Status error, wenn loadVideo fehlschlägt", async () => {
+    const loadError = new Error("IndexedDB nicht verfügbar");
+    vi.spyOn(dbModule, "loadVideo").mockRejectedValue(loadError);
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    const { result } = renderHook(() => useBoardstoryVideo("video-1"));
+
+    await waitFor(() => expect(result.current.status).toBe("error"));
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Boardstory konnte nicht geladen werden",
+      loadError,
+    );
+  });
 });

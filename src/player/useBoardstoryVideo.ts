@@ -4,6 +4,7 @@ import { loadVideo } from "../persistence/db";
 export type BoardstoryVideoState =
   | { status: "loading" }
   | { status: "not-found" }
+  | { status: "error" }
   | {
       status: "ready";
       videoUrl: string;
@@ -26,22 +27,30 @@ export function useBoardstoryVideo(videoId: string): BoardstoryVideoState {
     let isCancelled = false;
     let objectUrl: string | null = null;
 
-    loadVideo(videoId).then((record) => {
-      if (isCancelled) {
-        return;
-      }
-      if (!record) {
-        setState({ status: "not-found" });
-        return;
-      }
-      objectUrl = URL.createObjectURL(record.blob);
-      setState({
-        status: "ready",
-        videoUrl: objectUrl,
-        mimeType: record.mimeType,
-        cuePoints: record.cuePoints,
+    loadVideo(videoId)
+      .then((record) => {
+        if (isCancelled) {
+          return;
+        }
+        if (!record) {
+          setState({ status: "not-found" });
+          return;
+        }
+        objectUrl = URL.createObjectURL(record.blob);
+        setState({
+          status: "ready",
+          videoUrl: objectUrl,
+          mimeType: record.mimeType,
+          cuePoints: record.cuePoints,
+        });
+      })
+      .catch((error) => {
+        if (isCancelled) {
+          return;
+        }
+        console.error("Boardstory konnte nicht geladen werden", error);
+        setState({ status: "error" });
       });
-    });
 
     return () => {
       isCancelled = true;
