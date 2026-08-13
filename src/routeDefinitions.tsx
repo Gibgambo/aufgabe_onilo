@@ -1,15 +1,29 @@
-import type { ReactElement } from "react";
-import { Editor } from "./routes/Editor";
-import { Player } from "./routes/Player";
-import { RecordingsDashboard } from "./routes/RecordingsDashboard";
+import { lazy, type ComponentType, type LazyExoticComponent } from "react";
 
 export interface RouteDefinition {
   path: string;
-  element: ReactElement;
+  Component: LazyExoticComponent<ComponentType>;
 }
 
 export const routeDefinitions: RouteDefinition[] = [
-  { path: "/editor", element: <Editor /> },
-  { path: "/player/:videoId", element: <Player /> },
-  { path: "/recordings", element: <RecordingsDashboard /> },
+  {
+    path: "/editor",
+    Component: lazy(() =>
+      import("./routes/Editor").then((m) => ({ default: m.Editor })),
+    ),
+  },
+  {
+    path: "/player/:videoId",
+    Component: lazy(() =>
+      import("./routes/Player").then((m) => ({ default: m.Player })),
+    ),
+  },
+  {
+    path: "/recordings",
+    Component: lazy(() =>
+      import("./routes/RecordingsDashboard").then((m) => ({
+        default: m.RecordingsDashboard,
+      })),
+    ),
+  },
 ];
