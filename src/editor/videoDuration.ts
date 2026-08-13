@@ -5,6 +5,10 @@ export function getVideoDuration(file: File): Promise<number> {
 
     video.onloadedmetadata = () => {
       URL.revokeObjectURL(objectUrl);
+      if (!Number.isFinite(video.duration) || video.duration <= 0) {
+        reject(new Error("Videodauer konnte nicht ermittelt werden"));
+        return;
+      }
       resolve(video.duration);
     };
 

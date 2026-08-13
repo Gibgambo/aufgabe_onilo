@@ -102,6 +102,20 @@ describe("Editor – Upload-Flow", () => {
     expect(await screen.findByText("Player-Seite")).toBeInTheDocument();
   });
 
+  it("zeigt eine Fehlermeldung und navigiert nicht, wenn die Videodauer nicht ermittelt werden kann", async () => {
+    vi.spyOn(videoDuration, "getVideoDuration").mockRejectedValue(
+      new Error("Videodauer konnte nicht ermittelt werden"),
+    );
+    const user = userEvent.setup({ applyAccept: false });
+
+    renderEditor();
+    const input = screen.getByLabelText("Boardstory hochladen");
+    await user.upload(input, makeFile("boardstory.mp4", "video/mp4"));
+
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    expect(screen.queryByText("Player-Seite")).not.toBeInTheDocument();
+  });
+
   it("zeigt eine Fehlermeldung und navigiert nicht, wenn das Speichern fehlschlägt", async () => {
     vi.spyOn(videoDuration, "getVideoDuration").mockResolvedValue(100);
     vi.spyOn(db, "saveVideo").mockRejectedValue(new Error("Quota exceeded"));

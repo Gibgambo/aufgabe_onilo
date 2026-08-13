@@ -44,4 +44,18 @@ describe("getVideoDuration", () => {
 
     await expect(getVideoDuration(file)).rejects.toThrow();
   });
+
+  it("lehnt ab, wenn die ermittelte Dauer 0 ist", async () => {
+    stubVideoMetadataLoad(0);
+    const file = new File(["fake"], "leer.mp4", { type: "video/mp4" });
+
+    await expect(getVideoDuration(file)).rejects.toThrow();
+  });
+
+  it("lehnt ab, wenn die ermittelte Dauer NaN ist", async () => {
+    stubVideoMetadataLoad(NaN);
+    const file = new File(["fake"], "kaputt.mp4", { type: "video/mp4" });
+
+    await expect(getVideoDuration(file)).rejects.toThrow();
+  });
 });
