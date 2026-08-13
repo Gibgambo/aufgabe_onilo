@@ -1,3 +1,5 @@
+import { openDB, type DBSchema } from "idb";
+
 const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm"];
 const MAX_VIDEO_SIZE_BYTES = 500 * 1024 * 1024;
 
@@ -9,4 +11,76 @@ export function validateUpload(file: File): string | null {
         return "Die Datei ist zu groß. Maximal erlaubt sind 500 MB.";
     }
     return null;
+}
+
+export interface VideoRecord {
+    videoId: string;
+    name: string;
+    mimeType: string;
+    uploadedAt: string;
+    blob: Blob;
+    cuePoints: number[];
+}
+
+export interface RecordingRecord {
+    recordingId: string;
+    videoId: string;
+    studentName: string;
+    blob: Blob;
+    status: "unbewertet" | "normal" | "bestanden";
+    rating: number | null;
+    comment: string | null;
+}
+
+interface BoardstoryDB extends DBSchema {
+    videos: {
+        key: string;
+        value: VideoRecord;
+    };
+    recordings: {
+        key: string;
+        value: RecordingRecord;
+        indexes: { videoId: string };
+    };
+}
+
+const DB_NAME = "boardstory-player";
+const DB_VERSION = 1;
+
+function getDb() {
+    return openDB<BoardstoryDB>(DB_NAME, DB_VERSION, {
+        upgrade(db) {
+            db.createObjectStore("videos", { keyPath: "videoId" });
+            const recordingsStore = db.createObjectStore("recordings", {
+                keyPath: "recordingId",
+            });
+            recordingsStore.createIndex("videoId", "videoId");
+        },
+    });
+}
+
+export interface VideoInput {
+    name: string;
+    mimeType: string;
+    blob: Blob;
+    cuePoints: number[];
+}
+
+export async function saveVideo(input: VideoInput): Promise<string> {
+    const videoId = crypto.randomUUID();
+    const db = await getDb();
+    await db.put("videos", {
+        videoId,
+        name: input.name,
+        mimeType: input.mimeType,
+        blob: input.blob,
+        cuePoints: input.cuePoints,
+        uploadedAt: new Date().toISOString(),
+    });
+    return videoId;
+}
+
+export async function loadVideo(videoId: string): Promise<VideoRecord | undefined> {
+    const db = await getDb();
+    return db.get("videos", videoId);
 }

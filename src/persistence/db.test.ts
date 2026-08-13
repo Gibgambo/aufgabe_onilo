@@ -1,5 +1,8 @@
+// @vitest-environment node
+// node als Testumgebung anstatt jsdom, da jsdom keine blob Klasse supportet
 import { describe, expect, it } from "vitest";
-import { validateUpload } from "./db";
+import { validateUpload, saveVideo, loadVideo } from "./db";
+
 
 function makeFile(type: string, sizeBytes: number): File {
     return new File([new Uint8Array(sizeBytes)], "boardstory.mp4", { type });
@@ -22,5 +25,37 @@ describe("validateUpload", () => {
     it("lehnt eine Datei knapp über der 500-MB-Grenze ab", () => {
         const justOverLimit = 500 * 1024 * 1024 + 1;
         expect(validateUpload(makeFile("video/mp4", justOverLimit))).not.toBeNull();
+    });
+});
+
+describe("saveVideo / loadVideo", () => {
+    it("speichert ein Video und lädt es per videoId wieder, inkl. Cue-Points", async () => {
+        const blob = new Blob(["fake-video-data"], { type: "video/mp4" });
+        const videoId = await saveVideo({
+            name: "Meine Boardstory",
+            mimeType: "video/mp4",
+            blob,
+            cuePoints: [0, 25, 50],
+        });
+
+        const loaded = await loadVideo(videoId);
+
+        expect(loaded).toBeDefined();
+        expect(loaded?.videoId).toBe(videoId);
+        expect(loaded?.name).toBe("Meine Boardstory");
+        expect(loaded?.cuePoints).toEqual([0, 25, 50]);
+        expect(loaded?.blob).toBeInstanceOf(Blob);
+    });
+
+    it("gibt undefined zurück, wenn keine videoId existiert", async () => {
+        const loaded = await loadVideo("does-not-exist");
+        expect(loaded).toBeUndefined();
+    });
+
+    it("generiert für jeden Aufruf eine neue, eindeutige videoId", async () => {
+        const blob = new Blob(["data"], { type: "video/mp4" });
+        const idA = await saveVideo({ name: "A", mimeType: "video/mp4", blob, cuePoints: [] });
+        const idB = await saveVideo({ name: "B", mimeType: "video/mp4", blob, cuePoints: [] });
+        expect(idA).not.toBe(idB);
     });
 });
