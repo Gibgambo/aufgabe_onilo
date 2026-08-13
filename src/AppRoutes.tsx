@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { Navigate, Route, Routes } from "react-router";
 import { lazy, type ComponentType, type LazyExoticComponent } from "react";
 
 export interface RouteDefinition {
@@ -5,7 +7,7 @@ export interface RouteDefinition {
   Component: LazyExoticComponent<ComponentType>;
 }
 
-export const routeDefinitions: RouteDefinition[] = [
+const routeDefinitions: RouteDefinition[] = [
   {
     path: "/editor",
     Component: lazy(() =>
@@ -27,3 +29,19 @@ export const routeDefinitions: RouteDefinition[] = [
     ),
   },
 ];
+
+export function AppRoutes() {
+  return (
+    <Suspense fallback={null}>
+      <Routes>
+        <Route
+          path="/"
+          element={<Navigate to={routeDefinitions[0].path} replace />}
+        />
+        {routeDefinitions.map(({ path, Component }) => (
+          <Route key={path} path={path} element={<Component />} />
+        ))}
+      </Routes>
+    </Suspense>
+  );
+}

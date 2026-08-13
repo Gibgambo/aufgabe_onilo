@@ -1,19 +1,12 @@
 import { render, screen } from "@testing-library/react";
-import { Suspense } from "react";
-import { MemoryRouter, Route, Routes } from "react-router";
+import { MemoryRouter } from "react-router";
 import { describe, expect, it } from "vitest";
-import { routeDefinitions } from "./routeDefinitions";
+import { AppRoutes } from "./AppRoutes";
 
 function renderAt(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
-      <Suspense fallback={null}>
-        <Routes>
-          {routeDefinitions.map(({ path, Component }) => (
-            <Route key={path} path={path} element={<Component />} />
-          ))}
-        </Routes>
-      </Suspense>
+      <AppRoutes />
     </MemoryRouter>,
   );
 }
