@@ -15,13 +15,25 @@ import { useBoardstoryVideo } from "../player/useBoardstoryVideo";
 import { findNextCuePoint, findPreviousCuePoint } from "../domain/cuePoints";
 import type { VideoMimeType } from "@vidstack/react";
 import { RecordingPanel } from "../player/RecordingPanel";
-import { controlButtonClass } from "../player/playerStyles";
+import {
+  ghostControlButtonClass,
+  primaryControlButtonClass,
+  secondaryControlButtonClass,
+} from "../player/playerStyles";
+import {
+  MuteIcon,
+  NextChapterIcon,
+  PauseIcon,
+  PlayIcon,
+  PreviousChapterIcon,
+  VolumeIcon,
+} from "../player/icons";
 
 function StatusMessage({ text }: { text: string }) {
   return (
     <p
       role="status"
-      className="text-onilo-primary text-2xl font-semibold text-center"
+      className="font-display text-onilo-primary text-2xl font-semibold text-center"
     >
       {text}
     </p>
@@ -32,10 +44,10 @@ function PlayPauseButton() {
   const isPaused = useMediaState("paused");
   return (
     <PlayButton
-      className={controlButtonClass}
+      className={primaryControlButtonClass}
       aria-label={isPaused ? "Abspielen" : "Pause"}
     >
-      {isPaused ? "▶" : "⏸"}
+      {isPaused ? <PlayIcon className="h-9 w-9" /> : <PauseIcon className="h-9 w-9" />}
     </PlayButton>
   );
 }
@@ -44,10 +56,10 @@ function MuteToggleButton() {
   const isMuted = useMediaState("muted");
   return (
     <MuteButton
-      className={controlButtonClass}
+      className={ghostControlButtonClass}
       aria-label={isMuted ? "Ton aktivieren" : "Ton stummschalten"}
     >
-      {isMuted ? "🔇" : "🔊"}
+      {isMuted ? <MuteIcon className="h-7 w-7" /> : <VolumeIcon className="h-7 w-7" />}
     </MuteButton>
   );
 }
@@ -75,30 +87,63 @@ function ChapterButton({
   return (
     <button
       type="button"
-      className={controlButtonClass}
+      className={secondaryControlButtonClass}
       aria-label={label}
       onClick={handleClick}
     >
-      {direction === "previous" ? "⏮" : "⏭"}
+      {direction === "previous" ? (
+        <PreviousChapterIcon className="h-7 w-7" />
+      ) : (
+        <NextChapterIcon className="h-7 w-7" />
+      )}
     </button>
   );
 }
 
-function Timeline() {
+function ChapterPearls({ cuePoints }: { cuePoints: number[] }) {
+  const currentTime = useMediaState("currentTime");
+  const duration = useMediaState("duration");
+
+  if (!duration || !Number.isFinite(duration)) {
+    return null;
+  }
+
   return (
-    <div className="flex w-full items-center gap-3">
+    <div className="pointer-events-none absolute inset-0">
+      {cuePoints
+        .filter((cue) => cue > 0)
+        .map((cue) => {
+          const reached = currentTime >= cue;
+          return (
+            <span
+              key={cue}
+              className={`absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-onilo-stage ${
+                reached ? "bg-onilo-honey" : "bg-white/50"
+              }`}
+              style={{ left: `${(cue / duration) * 100}%` }}
+            />
+          );
+        })}
+    </div>
+  );
+}
+
+function Timeline({ cuePoints }: { cuePoints: number[] }) {
+  return (
+    <div className="flex w-full items-center gap-4">
       <TimeSlider.Root className="group relative flex h-10 w-full touch-none select-none items-center outline-none">
-        <TimeSlider.Track className="relative h-3 w-full rounded-full bg-onilo-primary/30">
-          <TimeSlider.TrackFill className="absolute h-full w-(--slider-fill) rounded-full bg-onilo-primary" />
+        <TimeSlider.Track className="relative h-3 w-full rounded-full bg-white/20">
+          <TimeSlider.TrackFill className="absolute h-full w-(--slider-fill) rounded-full bg-onilo-secondary" />
+          <ChapterPearls cuePoints={cuePoints} />
         </TimeSlider.Track>
         <TimeSlider.Thumb
           className="absolute top-1/2 left-(--slider-fill) h-7 w-7 -translate-x-1/2
-      -translate-y-1/2 rounded-full bg-onilo-accent shadow"
+      -translate-y-1/2 rounded-full bg-white shadow-md"
         />
       </TimeSlider.Root>
-      <div className="flex shrink-0 items-center gap-1 text-lg font-medium text-onilo-primary">
+      <div className="font-display flex shrink-0 items-center gap-1 text-lg font-medium text-white tabular-nums">
         <Time type="current" />
-        <span>/</span>
+        <span className="text-white/50">/</span>
         <Time type="duration" />
       </div>
     </div>
@@ -107,15 +152,15 @@ function Timeline() {
 
 function VolumeControl() {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-3">
       <MuteToggleButton />
-      <VolumeSlider.Root className="group relative flex h-10 w-32 touch-none select-none items-center outline-none">
-        <VolumeSlider.Track className="relative h-3 w-full rounded-full bg-onilo-primary/30">
-          <VolumeSlider.TrackFill className="absolute h-full w-(--slider-fill) rounded-full bg-onilo-primary" />
+      <VolumeSlider.Root className="group relative flex h-10 w-24 touch-none select-none items-center outline-none">
+        <VolumeSlider.Track className="relative h-2.5 w-full rounded-full bg-white/20">
+          <VolumeSlider.TrackFill className="absolute h-full w-(--slider-fill) rounded-full bg-white/70" />
         </VolumeSlider.Track>
         <VolumeSlider.Thumb
-          className="absolute top-1/2 left-(--slider-fill) h-7 w-7 -translate-x-1/2
-      -translate-y-1/2 rounded-full bg-onilo-accent shadow"
+          className="absolute top-1/2 left-(--slider-fill) h-5 w-5 -translate-x-1/2
+      -translate-y-1/2 rounded-full bg-white shadow"
         />
       </VolumeSlider.Root>
     </div>
@@ -127,8 +172,10 @@ export function Player() {
   const state = useBoardstoryVideo(videoId ?? "");
 
   return (
-    <div className="min-h-screen bg-onilo-background flex flex-col items-center justify-center gap-6 p-6">
-      <h1 className="text-onilo-primary text-3xl font-bold">Player</h1>
+    <div className="min-h-screen bg-onilo-background flex flex-col items-center gap-5 px-4 pt-8 pb-16 sm:px-8">
+      <h1 className="font-display text-onilo-primary text-sm font-semibold tracking-wide uppercase self-start sm:self-center sm:max-w-6xl sm:w-full">
+        Player
+      </h1>
 
       {state.status === "loading" && (
         <StatusMessage text="Boardstory wird geladen…" />
@@ -147,15 +194,23 @@ export function Player() {
           <MediaPlayer
             src={{ src: state.videoUrl, type: state.mimeType as VideoMimeType }}
             playsInline
-            className="flex w-full max-w-3xl flex-col gap-4 overflow-hidden rounded-xl bg-black p-4"
+            className="bg-onilo-stage flex w-full max-w-6xl flex-col overflow-hidden rounded-[28px] shadow-xl"
           >
             <MediaProvider />
-            <Timeline />
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <ChapterButton cuePoints={state.cuePoints} direction="previous" />
-              <PlayPauseButton />
-              <ChapterButton cuePoints={state.cuePoints} direction="next" />
-              <VolumeControl />
+            <div className="flex flex-col gap-6 p-5 sm:p-7">
+              <Timeline cuePoints={state.cuePoints} />
+              <div className="flex flex-wrap items-center justify-center gap-4 sm:justify-between">
+                <div className="hidden sm:block sm:w-24" aria-hidden="true" />
+                <div className="flex items-center gap-4">
+                  <ChapterButton
+                    cuePoints={state.cuePoints}
+                    direction="previous"
+                  />
+                  <PlayPauseButton />
+                  <ChapterButton cuePoints={state.cuePoints} direction="next" />
+                </div>
+                <VolumeControl />
+              </div>
             </div>
           </MediaPlayer>
           <RecordingPanel videoId={videoId ?? ""} />

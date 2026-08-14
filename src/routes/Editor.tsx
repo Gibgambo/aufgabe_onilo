@@ -40,9 +40,9 @@ export function Editor() {
 
   return (
     <div className="min-h-screen bg-onilo-background flex flex-col items-center justify-start gap-6 p-6">
-      <h1 className="text-onilo-primary text-3xl font-bold">Editor</h1>
+      <h1 className="font-display text-onilo-primary text-3xl font-semibold">Editor</h1>
       <label
-        className="bg-onilo-primary hover:bg-onilo-secondary text-white text-xl font-semibold px-8 py-4
+        className="bg-onilo-primary hover:bg-onilo-secondary font-display text-white text-xl font-semibold px-8 py-4
     rounded-xl cursor-pointer"
       >
         Boardstory hochladen

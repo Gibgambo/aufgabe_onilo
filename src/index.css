@@ -4,6 +4,17 @@
   --color-onilo-primary: #58a8c3;
   --color-onilo-secondary: #4dbfdb;
   --color-onilo-accent: #ef7b3c;
+  --color-onilo-accent-dark: #d95f1f;
+  --color-onilo-honey: #fdc426;
   --color-onilo-background: #eafbfe;
   --color-onilo-nav-hover: #d3f0f5;
+  --color-onilo-stage: #123647;
+  --color-onilo-stage-light: #1c4f66;
+
+  --font-display: "Fredoka", "Segoe UI Rounded", ui-rounded, sans-serif;
+  --font-body: "Nunito", "Segoe UI Rounded", ui-rounded, sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
 }

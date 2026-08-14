@@ -18,7 +18,7 @@ export function RecordingsDashboard() {
 
   return (
     <div className="min-h-screen bg-onilo-background flex flex-col items-center gap-6 p-6">
-      <h1 className="text-onilo-primary text-3xl font-bold">
+      <h1 className="font-display text-onilo-primary text-3xl font-semibold">
         Recordings-Dashboard
       </h1>
 

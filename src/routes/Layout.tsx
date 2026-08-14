@@ -8,7 +8,7 @@ const getNavLinkClassName = ({ isActive }: { isActive: boolean }) =>
 export function Layout() {
   return (
     <>
-      <header className="bg-onilo-primary flex gap-4 px-6 py-4 justify-center">
+      <header className="bg-onilo-primary font-display flex gap-4 px-6 py-4 justify-center">
         <NavLink to="/editor" className={getNavLinkClassName}>
           Editor
         </NavLink>
