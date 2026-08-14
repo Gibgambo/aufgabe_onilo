@@ -89,12 +89,19 @@ export function Editor() {
               <li key={video.videoId}>
                 <Link
                   to={`/player/${video.videoId}`}
-                  className="flex justify-between rounded-lg border border-onilo-primary/30 bg-white px-4 py-2
-  hover:bg-onilo-background"
+                  className="flex items-center justify-between rounded-lg border border-onilo-primary/30 bg-white px-4 py-2
+    hover:bg-onilo-background"
                 >
                   <span>{video.name}</span>
-                  <span>
+                  <span className="flex items-center gap-2">
                     {new Date(video.uploadedAt).toLocaleDateString("de-DE")}
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      className="h-7 w-7 fill-onilo-primary"
+                    >
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
                   </span>
                 </Link>
               </li>
