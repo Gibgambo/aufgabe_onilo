@@ -4,6 +4,8 @@ import { MemoryRouter, Route, Routes } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Editor } from "./Editor";
 import * as uploadBoardstoryModule from "../editor/uploadBoardstory";
+import * as useVideosListModule from "../editor/useVideosList";
+import type { VideoRecord } from "../persistence/db";
 
 function makeFile(name: string, type: string): File {
   return new File(["fake-content"], name, { type });
@@ -19,6 +21,62 @@ function renderEditor() {
     </MemoryRouter>,
   );
 }
+
+function makeVideo(overrides: Partial<VideoRecord> = {}): VideoRecord {
+  return {
+    videoId: "video-1",
+    name: "Boardstory A",
+    mimeType: "video/mp4",
+    uploadedAt: "2026-01-01T10:00:00.000Z",
+    blob: new Blob(["video"], { type: "video/mp4" }),
+    cuePoints: [],
+    ...overrides,
+  };
+}
+
+describe("Editor – Boardstory-Liste", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("zeigt einen Hinweistext, wenn noch keine Boardstory hochgeladen wurde", () => {
+    vi.spyOn(useVideosListModule, "useVideosList").mockReturnValue({
+      status: "ready",
+      videos: [],
+    });
+
+    renderEditor();
+
+    expect(
+      screen.getByText("Noch keine Boardstory hochgeladen."),
+    ).toBeInTheDocument();
+  });
+
+  it("zeigt Name und Datum jeder hochgeladenen Boardstory", () => {
+    vi.spyOn(useVideosListModule, "useVideosList").mockReturnValue({
+      status: "ready",
+      videos: [makeVideo({ name: "Meine Boardstory" })],
+    });
+
+    renderEditor();
+
+    expect(screen.getByText("Meine Boardstory")).toBeInTheDocument();
+    expect(screen.getByText("1.1.2026")).toBeInTheDocument();
+  });
+
+  it("navigiert zum Player der jeweiligen Boardstory bei Klick auf eine Zeile", async () => {
+    vi.spyOn(useVideosListModule, "useVideosList").mockReturnValue({
+      status: "ready",
+      videos: [makeVideo({ videoId: "video-42", name: "Meine Boardstory" })],
+    });
+    const user = userEvent.setup({ applyAccept: false });
+
+    renderEditor();
+    await user.click(screen.getByText("Meine Boardstory"));
+
+    expect(await screen.findByText("Player-Seite")).toBeInTheDocument();
+  });
+});
 
 describe("Editor", () => {
   it("zeigt eine Fehlermeldung bei nicht unterstütztem Videoformat", async () => {

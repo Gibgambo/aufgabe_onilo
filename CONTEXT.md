@@ -10,7 +10,7 @@ _Avoid_: Video (zu generisch — "Video" ist das technische Trägerformat, "Boar
 
 **Cue-Point**:
 Ein Zeitstempel innerhalb einer Boardstory, der eine Kapitelgrenze markiert. Wird automatisch in festen Intervallen aus der Videodauer generiert (nicht manuell gesetzt), siehe [ADR-0004](./docs/adr/0004-auto-generated-cue-points.md). Steuert die Vor/Zurück-Navigation im Player.
-_Avoid_: Marker, Kapitel (Kapitel ist der Abschnitt *zwischen* zwei Cue-Points, nicht der Zeitstempel selbst), Seek-Point.
+_Avoid_: Marker, Kapitel (Kapitel ist der Abschnitt _zwischen_ zwei Cue-Points, nicht der Zeitstempel selbst), Seek-Point.
 
 **Recording**:
 Eine Audioaufnahme, in der ein Kind eine Boardstory vorliest, erstellt im Player und einer `videoId` zugeordnet. Trägt den selbst eingegebenen Namen des Kindes (siehe [ADR-0005](./docs/adr/0005-shared-device-student-identity.md)) sowie eine Bewertung, die eine Lehrkraft im Recordings-Dashboard vergibt.
@@ -25,7 +25,9 @@ Der Bewertungszustand, den eine Lehrkraft einem Recording zuweist: `unbewertet` 
 _Avoid_: Rating, Bewertung (Bewertung ist die Handlung, Status das Ergebnis).
 
 **Editor**:
-Die Route (`/editor`), auf der eine Boardstory als lokale Videodatei hochgeladen wird. Kein inhaltlicher Bearbeitungs-Editor (kein Schnitt, keine Marker-UI) — beschränkt auf Upload.
+Die Route (`/editor`), auf der eine Boardstory als lokale Videodatei hochgeladen wird und bereits hochgeladene
+Boardstories zum erneuten Öffnen im Player aufgelistet werden. Kein inhaltlicher Bearbeitungs-Editor (kein Schnitt,
+keine Marker-UI) — beschränkt auf Upload und Übersicht.
 _Avoid_: Upload-Seite.
 
 **Player**:
