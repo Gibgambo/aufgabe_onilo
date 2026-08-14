@@ -17,6 +17,10 @@ describe("Routing-Skelett", () => {
     expect(
       await screen.findByRole("heading", { name: "Editor" }),
     ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Editor" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Recordings-Dashboard" }),
+    ).toBeInTheDocument();
   });
 
   it("rendert Player auf /player/:videoId", async () => {
@@ -24,12 +28,20 @@ describe("Routing-Skelett", () => {
     expect(
       await screen.findByRole("heading", { name: "Player" }),
     ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Editor" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Recordings-Dashboard" }),
+    ).toBeInTheDocument();
   });
 
   it("rendert Recordings-Dashboard auf /recordings", async () => {
     renderAt("/recordings");
     expect(
       await screen.findByRole("heading", { name: "Recordings-Dashboard" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Editor" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Recordings-Dashboard" }),
     ).toBeInTheDocument();
   });
 });

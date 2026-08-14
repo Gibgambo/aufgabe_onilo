@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router";
 import { lazy, type ComponentType, type LazyExoticComponent } from "react";
+import { Layout } from "./routes/Layout";
 
 export interface RouteDefinition {
   path: string;
@@ -34,13 +35,15 @@ export function AppRoutes() {
   return (
     <Suspense fallback={null}>
       <Routes>
-        <Route
-          path="/"
-          element={<Navigate to={routeDefinitions[0].path} replace />}
-        />
-        {routeDefinitions.map(({ path, Component }) => (
-          <Route key={path} path={path} element={<Component />} />
-        ))}
+        <Route element={<Layout />}>
+          <Route
+            path="/"
+            element={<Navigate to={routeDefinitions[0].path} replace />}
+          />
+          {routeDefinitions.map(({ path, Component }) => (
+            <Route key={path} path={path} element={<Component />} />
+          ))}
+        </Route>
       </Routes>
     </Suspense>
   );
