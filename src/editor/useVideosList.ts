@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { listVideos } from "../persistence/db";
 import type { VideoRecord } from "../persistence/db";
+import { sortVideosByUploadDate } from "./sortVideosByUploadDate";
 
 export type VideosListState =
   | { status: "loading" }
@@ -16,10 +17,7 @@ export function useVideosList(): VideosListState {
     listVideos()
       .then((videos) => {
         if (!isCancelled) {
-          const sorted = [...videos].sort((a, b) =>
-            b.uploadedAt.localeCompare(a.uploadedAt),
-          );
-          setState({ status: "ready", videos: sorted });
+          setState({ status: "ready", videos: sortVideosByUploadDate(videos) });
         }
       })
       .catch((error) => {

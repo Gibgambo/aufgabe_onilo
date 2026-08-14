@@ -29,7 +29,7 @@ describe("useVideosList", () => {
     );
   });
 
-  it("sortiert die Videos nach uploadedAt absteigend", async () => {
+  it("sortiert die Videos vor dem ready-Status nach uploadedAt absteigend", async () => {
     const older = makeVideo({
       videoId: "video-old",
       uploadedAt: "2026-01-01T10:00:00.000Z",

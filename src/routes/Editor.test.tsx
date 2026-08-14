@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Editor } from "./Editor";
 import * as uploadBoardstoryModule from "../editor/uploadBoardstory";
 import * as useVideosListModule from "../editor/useVideosList";
@@ -79,6 +79,17 @@ describe("Editor – Boardstory-Liste", () => {
 });
 
 describe("Editor", () => {
+  beforeEach(() => {
+    vi.spyOn(useVideosListModule, "useVideosList").mockReturnValue({
+      status: "ready",
+      videos: [],
+    });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("zeigt eine Fehlermeldung bei nicht unterstütztem Videoformat", async () => {
     const user = userEvent.setup({ applyAccept: false });
     renderEditor();
@@ -115,6 +126,13 @@ describe("Editor", () => {
 });
 
 describe("Editor – Upload-Flow", () => {
+  beforeEach(() => {
+    vi.spyOn(useVideosListModule, "useVideosList").mockReturnValue({
+      status: "ready",
+      videos: [],
+    });
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });

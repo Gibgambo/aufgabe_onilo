@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router";
+import { useNavigate } from "react-router";
 import { validateUpload } from "../persistence/db";
 import { uploadBoardstory } from "../editor/uploadBoardstory";
 import { useVideosList } from "../editor/useVideosList";
+import { VideoRow } from "../editor/VideoRow";
 
 export function Editor() {
   const [error, setError] = useState<string | null>(null);
@@ -87,23 +88,7 @@ export function Editor() {
           <ul className="flex w-full max-w-2xl flex-col gap-2">
             {videosListState.videos.map((video) => (
               <li key={video.videoId}>
-                <Link
-                  to={`/player/${video.videoId}`}
-                  className="flex items-center justify-between rounded-lg border border-onilo-primary/30 bg-white px-4 py-2
-    hover:bg-onilo-background"
-                >
-                  <span>{video.name}</span>
-                  <span className="flex items-center gap-2">
-                    {new Date(video.uploadedAt).toLocaleDateString("de-DE")}
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      className="h-7 w-7 fill-onilo-primary"
-                    >
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </span>
-                </Link>
+                <VideoRow video={video} />
               </li>
             ))}
           </ul>
