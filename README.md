@@ -27,7 +27,7 @@ flowchart TD
         K --> L[Recording als Blob in IndexedDB speichern]
     end
 
-    L --> M
+    L -->|Lehrkraft öffnet /recordings manuell| M
 
     subgraph Dashboard["/recordings"]
         M[Recordings aus IndexedDB laden] --> N[Filtern/Sortieren]
