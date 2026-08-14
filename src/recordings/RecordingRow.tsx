@@ -1,5 +1,5 @@
 import type { RecordingRecord } from "../persistence/db";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const statusLabels: Record<RecordingRecord["status"], string> = {
   unbewertet: "Unbewertet",
@@ -16,12 +16,14 @@ export interface RecordingRowProps {
     status: RecordingRecord["status"],
   ) => void;
   onRatingChange: (recordingId: string, rating: number) => void;
+  onCommentChange: (recordingId: string, comment: string) => void;
 }
 
 export function RecordingRow({
   recording,
   onStatusChange,
   onRatingChange,
+  onCommentChange,
 }: RecordingRowProps) {
   const audioUrl = useMemo(
     () => URL.createObjectURL(recording.blob),
@@ -33,6 +35,16 @@ export function RecordingRow({
       URL.revokeObjectURL(audioUrl);
     };
   }, [audioUrl]);
+
+  const [commentDraft, setCommentDraft] = useState(recording.comment ?? "");
+  const [draftRecordingId, setDraftRecordingId] = useState(
+    recording.recordingId,
+  );
+
+  if (recording.recordingId !== draftRecordingId) {
+    setDraftRecordingId(recording.recordingId);
+    setCommentDraft(recording.comment ?? "");
+  }
 
   return (
     <div className="flex w-full max-w-3xl flex-col gap-2 rounded-xl bg-white p-4 shadow">
@@ -77,9 +89,15 @@ export function RecordingRow({
           </button>
         ))}
       </div>
-      <p className="text-sm text-onilo-primary">
-        Kommentar: {recording.comment ?? "–"}
-      </p>
+      <label className="flex flex-col gap-1 text-sm font-medium text-onilo-primary">
+        Kommentar
+        <textarea
+          value={commentDraft}
+          onChange={(event) => setCommentDraft(event.target.value)}
+          onBlur={() => onCommentChange(recording.recordingId, commentDraft)}
+          className="rounded-lg border border-onilo-primary/30 bg-white px-3 py-2 text-black"
+        />
+      </label>
     </div>
   );
 }

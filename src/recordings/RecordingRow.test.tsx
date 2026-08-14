@@ -20,36 +20,17 @@ function makeRecording(
 }
 
 describe("RecordingRow", () => {
-  it("zeigt studentName und Kommentar eines Recordings an", () => {
+  it("zeigt studentName eines Recordings an", () => {
     render(
       <RecordingRow
-        recording={makeRecording({
-          studentName: "Mia",
-          status: "bestanden",
-          rating: 4,
-          comment: "Sehr flüssig gelesen",
-        })}
+        recording={makeRecording({ studentName: "Mia" })}
         onStatusChange={vi.fn()}
         onRatingChange={vi.fn()}
+        onCommentChange={vi.fn()}
       />,
     );
 
     expect(screen.getByText("Mia")).toBeInTheDocument();
-    expect(
-      screen.getByText("Kommentar: Sehr flüssig gelesen"),
-    ).toBeInTheDocument();
-  });
-
-  it("zeigt einen Platzhalter, solange kein Kommentar gesetzt ist", () => {
-    render(
-      <RecordingRow
-        recording={makeRecording({ comment: null })}
-        onStatusChange={vi.fn()}
-        onRatingChange={vi.fn()}
-      />,
-    );
-
-    expect(screen.getByText("Kommentar: –")).toBeInTheDocument();
   });
 
   it("rendert einen abspielbaren Inline-Player für das Recording", () => {
@@ -60,6 +41,7 @@ describe("RecordingRow", () => {
         recording={makeRecording()}
         onStatusChange={vi.fn()}
         onRatingChange={vi.fn()}
+        onCommentChange={vi.fn()}
       />,
     );
 
@@ -80,6 +62,7 @@ describe("RecordingRow", () => {
         })}
         onStatusChange={onStatusChange}
         onRatingChange={vi.fn()}
+        onCommentChange={vi.fn()}
       />,
     );
 
@@ -103,6 +86,7 @@ describe("RecordingRow", () => {
         recording={makeRecording({ rating: 3 })}
         onStatusChange={vi.fn()}
         onRatingChange={vi.fn()}
+        onCommentChange={vi.fn()}
       />,
     );
 
@@ -124,11 +108,46 @@ describe("RecordingRow", () => {
         recording={makeRecording({ recordingId: "rec-1", rating: null })}
         onStatusChange={vi.fn()}
         onRatingChange={onRatingChange}
+        onCommentChange={vi.fn()}
       />,
     );
 
     await user.click(screen.getByRole("button", { name: "4 Sterne" }));
 
     expect(onRatingChange).toHaveBeenCalledWith("rec-1", 4);
+  });
+
+  it("zeigt den bestehenden Kommentar im Textfeld an", () => {
+    render(
+      <RecordingRow
+        recording={makeRecording({ comment: "Sehr flüssig gelesen" })}
+        onStatusChange={vi.fn()}
+        onRatingChange={vi.fn()}
+        onCommentChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText("Kommentar")).toHaveValue(
+      "Sehr flüssig gelesen",
+    );
+  });
+
+  it("meldet einen geänderten Kommentar beim Verlassen des Felds zurück", async () => {
+    const user = userEvent.setup();
+    const onCommentChange = vi.fn();
+    render(
+      <RecordingRow
+        recording={makeRecording({ recordingId: "rec-1", comment: null })}
+        onStatusChange={vi.fn()}
+        onRatingChange={vi.fn()}
+        onCommentChange={onCommentChange}
+      />,
+    );
+
+    const textarea = screen.getByLabelText("Kommentar");
+    await user.type(textarea, "Toll gemacht");
+    await user.tab();
+
+    expect(onCommentChange).toHaveBeenCalledWith("rec-1", "Toll gemacht");
   });
 });
