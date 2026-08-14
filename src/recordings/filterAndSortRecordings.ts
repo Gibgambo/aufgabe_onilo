@@ -1,10 +1,12 @@
 import type { RecordingRecord } from "../persistence/db";
 
 export type StatusFilter = RecordingRecord["status"] | "alle";
+export type RatingFilter = 1 | 2 | 3 | 4 | 5 | "alle";
 export type SortOrder = "keine" | "rating-aufsteigend" | "rating-absteigend";
 
 export interface RecordingsFilter {
   status: StatusFilter;
+  rating: RatingFilter;
   sortBy: SortOrder;
 }
 
@@ -25,9 +27,15 @@ export function filterAndSortRecordings(
   recordings: RecordingRecord[],
   filter: RecordingsFilter,
 ): RecordingRecord[] {
-  const filtered =
+  const filteredByStatus =
     filter.status === "alle"
       ? recordings
       : recordings.filter((recording) => recording.status === filter.status);
-  return sortByRating(filtered, filter.sortBy);
+  const filteredByRating =
+    filter.rating === "alle"
+      ? filteredByStatus
+      : filteredByStatus.filter(
+          (recording) => recording.rating === filter.rating,
+        );
+  return sortByRating(filteredByRating, filter.sortBy);
 }

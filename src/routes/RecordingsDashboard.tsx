@@ -6,7 +6,11 @@ import {
   type RecordingsFilter,
 } from "../recordings/filterAndSortRecordings";
 
-const initialFilter: RecordingsFilter = { status: "alle", sortBy: "keine" };
+const initialFilter: RecordingsFilter = {
+  status: "alle",
+  rating: "alle",
+  sortBy: "keine",
+};
 
 export function RecordingsDashboard() {
   const { state, updateError, updateRecordingFields } = useRecordingsList();
@@ -72,6 +76,29 @@ export function RecordingsDashboard() {
                 <option value="keine">Keine</option>
                 <option value="rating-aufsteigend">Rating aufsteigend</option>
                 <option value="rating-absteigend">Rating absteigend</option>
+              </select>
+            </label>
+            <label className="flex items-center gap-2 text-onilo-primary">
+              Bewertung
+              <select
+                value={filter.rating}
+                onChange={(event) =>
+                  setFilter((current) => ({
+                    ...current,
+                    rating:
+                      event.target.value === "alle"
+                        ? "alle"
+                        : (Number(event.target.value) as 1 | 2 | 3 | 4 | 5),
+                  }))
+                }
+                className="rounded-lg border border-onilo-primary/30 bg-white px-2 py-1"
+              >
+                <option value="alle">Alle</option>
+                <option value="1">1 Stern</option>
+                <option value="2">2 Sterne</option>
+                <option value="3">3 Sterne</option>
+                <option value="4">4 Sterne</option>
+                <option value="5">5 Sterne</option>
               </select>
             </label>
           </div>

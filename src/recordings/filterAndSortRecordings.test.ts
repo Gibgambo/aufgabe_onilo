@@ -26,6 +26,7 @@ describe("filterAndSortRecordings", () => {
 
     const result = filterAndSortRecordings(recordings, {
       status: "alle",
+      rating: "alle",
       sortBy: "keine",
     });
 
@@ -45,6 +46,7 @@ describe("filterAndSortRecordings", () => {
 
     const result = filterAndSortRecordings(recordings, {
       status: "unbewertet",
+      rating: "alle",
       sortBy: "keine",
     });
 
@@ -58,6 +60,7 @@ describe("filterAndSortRecordings", () => {
 
     const result = filterAndSortRecordings([rating5, unrated, rating2], {
       status: "alle",
+      rating: "alle",
       sortBy: "rating-aufsteigend",
     });
 
@@ -71,10 +74,28 @@ describe("filterAndSortRecordings", () => {
 
     const result = filterAndSortRecordings(original, {
       status: "alle",
+      rating: "alle",
       sortBy: "rating-absteigend",
     });
 
     expect(result).toEqual([rating5, rating2]);
     expect(original).toEqual([rating2, rating5]);
+  });
+
+  it("gibt nur Recordings mit dem gewählten Rating zurück", () => {
+    const threeStars = makeRecording({ recordingId: "rec-3", rating: 3 });
+    const recordings = [
+      threeStars,
+      makeRecording({ recordingId: "rec-5", rating: 5 }),
+      makeRecording({ recordingId: "rec-0", rating: null }),
+    ];
+
+    const result = filterAndSortRecordings(recordings, {
+      status: "alle",
+      rating: 3,
+      sortBy: "keine",
+    });
+
+    expect(result).toEqual([threeStars]);
   });
 });

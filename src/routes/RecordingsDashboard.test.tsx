@@ -104,4 +104,24 @@ describe("RecordingsDashboard", () => {
       "konnte nicht gespeichert werden",
     );
   });
+
+  it("filtert nach Auswahl auf das gewählte Rating", async () => {
+    vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mock-url");
+    const recordings = [
+      makeRecording({ recordingId: "rec-1", studentName: "Mia", rating: 3 }),
+      makeRecording({ recordingId: "rec-2", studentName: "Tom", rating: 5 }),
+    ];
+    vi.spyOn(useRecordingsListModule, "useRecordingsList").mockReturnValue({
+      state: { status: "ready", recordings },
+      updateError: false,
+      updateRecordingFields: vi.fn(),
+    });
+    const user = userEvent.setup();
+
+    render(<RecordingsDashboard />);
+    await user.selectOptions(screen.getByLabelText("Bewertung"), "5 Sterne");
+
+    expect(screen.queryByText("Mia")).not.toBeInTheDocument();
+    expect(screen.getByText("Tom")).toBeInTheDocument();
+  });
 });
