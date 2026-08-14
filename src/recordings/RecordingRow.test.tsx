@@ -20,7 +20,7 @@ function makeRecording(
 }
 
 describe("RecordingRow", () => {
-  it("zeigt studentName, Status, Rating und Kommentar eines Recordings an", () => {
+  it("zeigt studentName und Kommentar eines Recordings an", () => {
     render(
       <RecordingRow
         recording={makeRecording({
@@ -30,25 +30,25 @@ describe("RecordingRow", () => {
           comment: "Sehr flüssig gelesen",
         })}
         onStatusChange={vi.fn()}
+        onRatingChange={vi.fn()}
       />,
     );
 
     expect(screen.getByText("Mia")).toBeInTheDocument();
-    expect(screen.getByText("Bewertung: 4")).toBeInTheDocument();
     expect(
       screen.getByText("Kommentar: Sehr flüssig gelesen"),
     ).toBeInTheDocument();
   });
 
-  it("zeigt einen Platzhalter, solange Rating und Kommentar noch nicht gesetzt sind", () => {
+  it("zeigt einen Platzhalter, solange kein Kommentar gesetzt ist", () => {
     render(
       <RecordingRow
-        recording={makeRecording({ rating: null, comment: null })}
+        recording={makeRecording({ comment: null })}
         onStatusChange={vi.fn()}
+        onRatingChange={vi.fn()}
       />,
     );
 
-    expect(screen.getByText("Bewertung: –")).toBeInTheDocument();
     expect(screen.getByText("Kommentar: –")).toBeInTheDocument();
   });
 
@@ -56,7 +56,11 @@ describe("RecordingRow", () => {
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mock-url");
 
     const { container } = render(
-      <RecordingRow recording={makeRecording()} onStatusChange={vi.fn()} />,
+      <RecordingRow
+        recording={makeRecording()}
+        onStatusChange={vi.fn()}
+        onRatingChange={vi.fn()}
+      />,
     );
 
     const audio = container.querySelector("audio");
@@ -75,6 +79,7 @@ describe("RecordingRow", () => {
           status: "unbewertet",
         })}
         onStatusChange={onStatusChange}
+        onRatingChange={vi.fn()}
       />,
     );
 
@@ -90,5 +95,40 @@ describe("RecordingRow", () => {
     await user.click(screen.getByRole("button", { name: "Bestanden" }));
 
     expect(onStatusChange).toHaveBeenCalledWith("rec-1", "bestanden");
+  });
+
+  it("zeigt das aktuelle Rating als gefüllte Sterne an", () => {
+    render(
+      <RecordingRow
+        recording={makeRecording({ rating: 3 })}
+        onStatusChange={vi.fn()}
+        onRatingChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "3 Sterne" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "4 Sterne" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+  });
+
+  it("meldet einen Rating-Klick mit recordingId und gewähltem Wert zurück", async () => {
+    const user = userEvent.setup();
+    const onRatingChange = vi.fn();
+    render(
+      <RecordingRow
+        recording={makeRecording({ recordingId: "rec-1", rating: null })}
+        onStatusChange={vi.fn()}
+        onRatingChange={onRatingChange}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "4 Sterne" }));
+
+    expect(onRatingChange).toHaveBeenCalledWith("rec-1", 4);
   });
 });

@@ -15,9 +15,14 @@ export interface RecordingRowProps {
     recordingId: string,
     status: RecordingRecord["status"],
   ) => void;
+  onRatingChange: (recordingId: string, rating: number) => void;
 }
 
-export function RecordingRow({ recording, onStatusChange }: RecordingRowProps) {
+export function RecordingRow({
+  recording,
+  onStatusChange,
+  onRatingChange,
+}: RecordingRowProps) {
   const audioUrl = useMemo(
     () => URL.createObjectURL(recording.blob),
     [recording.blob],
@@ -54,9 +59,24 @@ export function RecordingRow({ recording, onStatusChange }: RecordingRowProps) {
         </div>
       </div>
       <audio controls src={audioUrl} className="w-full" />
-      <p className="text-sm text-onilo-primary">
-        Bewertung: {recording.rating ?? "–"}
-      </p>
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            aria-pressed={star <= (recording.rating ?? 0)}
+            aria-label={`${star} Stern${star === 1 ? "" : "e"}`}
+            onClick={() => onRatingChange(recording.recordingId, star)}
+            className={
+              star <= (recording.rating ?? 0)
+                ? "text-2xl text-onilo-accent"
+                : "text-2xl text-onilo-primary/30"
+            }
+          >
+            ★
+          </button>
+        ))}
+      </div>
       <p className="text-sm text-onilo-primary">
         Kommentar: {recording.comment ?? "–"}
       </p>
