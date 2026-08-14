@@ -9,6 +9,7 @@ export type RecordingsListState =
 
 export interface UseRecordingsListResult {
   state: RecordingsListState;
+  updateError: boolean;
   updateRecordingFields: (
     recordingId: string,
     updates: RecordingUpdate,
@@ -19,6 +20,7 @@ export function useRecordingsList(): UseRecordingsListResult {
   const [state, setState] = useState<RecordingsListState>({
     status: "loading",
   });
+  const [updateError, setUpdateError] = useState(false);
 
   useEffect(() => {
     let isCancelled = false;
@@ -45,20 +47,26 @@ export function useRecordingsList(): UseRecordingsListResult {
     recordingId: string,
     updates: RecordingUpdate,
   ) {
-    await updateRecording(recordingId, updates);
-    setState((current) =>
-      current.status === "ready"
-        ? {
-            status: "ready",
-            recordings: current.recordings.map((recording) =>
-              recording.recordingId === recordingId
-                ? { ...recording, ...updates }
-                : recording,
-            ),
-          }
-        : current,
-    );
+    try {
+      await updateRecording(recordingId, updates);
+      setUpdateError(false);
+      setState((current) =>
+        current.status === "ready"
+          ? {
+              status: "ready",
+              recordings: current.recordings.map((recording) =>
+                recording.recordingId === recordingId
+                  ? { ...recording, ...updates }
+                  : recording,
+              ),
+            }
+          : current,
+      );
+    } catch (error) {
+      console.error("Recording konnte nicht aktualisiert werden", error);
+      setUpdateError(true);
+    }
   }
 
-  return { state, updateRecordingFields };
+  return { state, updateError, updateRecordingFields };
 }

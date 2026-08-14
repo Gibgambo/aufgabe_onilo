@@ -60,12 +60,29 @@ describe("useRecordingsList", () => {
       status: "bestanden",
       rating: 5,
     });
-    
+
     await waitFor(() =>
       expect(result.current.state).toEqual({
         status: "ready",
         recordings: [makeRecording({ status: "bestanden", rating: 5 })],
       }),
     );
+  });
+
+  it("setzt updateError, wenn das Speichern einer Änderung fehlschlägt", async () => {
+    const recordings = [makeRecording()];
+    vi.spyOn(db, "listRecordings").mockResolvedValue(recordings);
+    vi.spyOn(db, "updateRecording").mockRejectedValue(new Error("db kaputt"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const { result } = renderHook(() => useRecordingsList());
+    await waitFor(() => expect(result.current.state.status).toBe("ready"));
+
+    await result.current.updateRecordingFields("rec-1", {
+      status: "bestanden",
+    });
+
+    await waitFor(() => expect(result.current.updateError).toBe(true));
+    expect(result.current.state).toEqual({ status: "ready", recordings });
   });
 });

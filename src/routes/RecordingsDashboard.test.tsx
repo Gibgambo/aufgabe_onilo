@@ -24,6 +24,7 @@ describe("RecordingsDashboard", () => {
   it("zeigt einen Ladehinweis, während die Recordings geladen werden", () => {
     vi.spyOn(useRecordingsListModule, "useRecordingsList").mockReturnValue({
       state: { status: "loading" },
+      updateError: false,
       updateRecordingFields: vi.fn(),
     });
 
@@ -50,6 +51,7 @@ describe("RecordingsDashboard", () => {
     ];
     vi.spyOn(useRecordingsListModule, "useRecordingsList").mockReturnValue({
       state: { status: "ready", recordings },
+      updateError: false,
       updateRecordingFields: vi.fn(),
     });
     const user = userEvent.setup();
@@ -75,6 +77,7 @@ describe("RecordingsDashboard", () => {
           makeRecording({ recordingId: "rec-1", status: "unbewertet" }),
         ],
       },
+      updateError: false,
       updateRecordingFields,
     });
     const user = userEvent.setup();
@@ -85,5 +88,20 @@ describe("RecordingsDashboard", () => {
     expect(updateRecordingFields).toHaveBeenCalledWith("rec-1", {
       status: "bestanden",
     });
+  });
+
+  it("zeigt eine Fehlermeldung, wenn eine Änderung nicht gespeichert werden konnte", () => {
+    vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mock-url");
+    vi.spyOn(useRecordingsListModule, "useRecordingsList").mockReturnValue({
+      state: { status: "ready", recordings: [makeRecording()] },
+      updateError: true,
+      updateRecordingFields: vi.fn(),
+    });
+
+    render(<RecordingsDashboard />);
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "konnte nicht gespeichert werden",
+    );
   });
 });

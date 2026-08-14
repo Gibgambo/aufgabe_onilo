@@ -9,7 +9,7 @@ import {
 const initialFilter: RecordingsFilter = { status: "alle", sortBy: "keine" };
 
 export function RecordingsDashboard() {
-  const { state, updateRecordingFields } = useRecordingsList();
+  const { state, updateError, updateRecordingFields } = useRecordingsList();
   const [filter, setFilter] = useState<RecordingsFilter>(initialFilter);
 
   return (
@@ -18,6 +18,12 @@ export function RecordingsDashboard() {
         Recordings-Dashboard
       </h1>
 
+      {updateError && (
+        <p role="alert" className="text-onilo-accent text-lg">
+          Eine Änderung konnte nicht gespeichert werden. Bitte versuche es
+          erneut.
+        </p>
+      )}
       {state.status === "loading" && (
         <p role="status" className="text-onilo-primary text-lg">
           Recordings werden geladen…
