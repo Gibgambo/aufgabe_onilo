@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { saveRecording } from "../persistence/db";
 
 export type RecordingState =
@@ -21,6 +21,19 @@ export function useRecording(videoId: string): UseRecordingResult {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const studentNameRef = useRef("");
+
+  useEffect(() => {
+    return () => {
+      const recorder = mediaRecorderRef.current;
+      if (recorder) {
+        // stoppt die Tracks direkt statt recorder.stop(), sonst würde der
+        // Browser onstop weiterhin automatisch feuern, sobald der Stream
+        // inaktiv wird — und saveChunks() liefe trotzdem noch
+        recorder.onstop = null;
+        recorder.stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []);
 
   async function saveChunks() {
     setState({ status: "saving" });

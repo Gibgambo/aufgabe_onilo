@@ -107,4 +107,24 @@ describe("useRecording", () => {
       permissionError,
     );
   });
+
+  it("stoppt die Mikrofon-Tracks und verwirft die Chunks, wenn während der Aufnahme unmounted wird", async () => {
+    vi.stubGlobal("MediaRecorder", FakeMediaRecorder);
+    const getUserMedia = stubGetUserMedia();
+    const stream = makeFakeStream();
+    getUserMedia.mockResolvedValue(stream);
+    const saveRecordingSpy = vi.spyOn(dbModule, "saveRecording");
+
+    const { result, unmount } = renderHook(() => useRecording("video-1"));
+    await act(async () => {
+      result.current.start("Tim");
+    });
+    await waitFor(() => expect(result.current.state.status).toBe("recording"));
+
+    unmount();
+
+    const [track] = stream.getTracks();
+    expect(track.stop).toHaveBeenCalled();
+    expect(saveRecordingSpy).not.toHaveBeenCalled();
+  });
 });
