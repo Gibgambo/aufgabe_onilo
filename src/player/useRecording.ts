@@ -85,7 +85,7 @@ export function useRecording(videoId: string): UseRecordingResult {
     }
 
     if (!isMountedRef.current) {
-      stream.getTracks().forEach((track) => track.stop());
+      stopTracks(stream);
       return;
     }
 
