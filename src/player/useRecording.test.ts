@@ -127,4 +127,33 @@ describe("useRecording", () => {
     expect(track.stop).toHaveBeenCalled();
     expect(saveRecordingSpy).not.toHaveBeenCalled();
   });
+
+  it("gibt den Mikrofon-Stream frei, wenn während des Permission-Requests unmounted wird", async () => {
+    vi.stubGlobal("MediaRecorder", FakeMediaRecorder);
+    const getUserMedia = stubGetUserMedia();
+    const stream = makeFakeStream();
+    let resolveGetUserMedia!: (stream: MediaStream) => void;
+    getUserMedia.mockReturnValue(
+      new Promise<MediaStream>((resolve) => {
+        resolveGetUserMedia = resolve;
+      }),
+    );
+
+    const { result, unmount } = renderHook(() => useRecording("video-1"));
+    act(() => {
+      result.current.start("Tim");
+    });
+    await waitFor(() =>
+      expect(result.current.state.status).toBe("requesting-permission"),
+    );
+
+    unmount();
+
+    await act(async () => {
+      resolveGetUserMedia(stream);
+    });
+
+    const [track] = stream.getTracks();
+    expect(track.stop).toHaveBeenCalled();
+  });
 });

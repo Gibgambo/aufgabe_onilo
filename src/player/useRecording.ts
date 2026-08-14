@@ -21,9 +21,11 @@ export function useRecording(videoId: string): UseRecordingResult {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const studentNameRef = useRef("");
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
     return () => {
+      isMountedRef.current = false;
       const recorder = mediaRecorderRef.current;
       if (recorder) {
         // stoppt die Tracks direkt statt recorder.stop(), sonst würde der
@@ -78,6 +80,11 @@ export function useRecording(videoId: string): UseRecordingResult {
       return;
     }
 
+    if (!isMountedRef.current) {
+      stream.getTracks().forEach((track) => track.stop());
+      return;
+    }
+    
     chunksRef.current = [];
     mediaRecorderRef.current = createRecorder(stream);
     mediaRecorderRef.current.start();
