@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { RecordingRow } from "./RecordingRow";
 import type { RecordingRecord } from "../persistence/db";
@@ -28,11 +29,11 @@ describe("RecordingRow", () => {
           rating: 4,
           comment: "Sehr flüssig gelesen",
         })}
+        onStatusChange={vi.fn()}
       />,
     );
 
     expect(screen.getByText("Mia")).toBeInTheDocument();
-    expect(screen.getByText("Bestanden")).toBeInTheDocument();
     expect(screen.getByText("Bewertung: 4")).toBeInTheDocument();
     expect(
       screen.getByText("Kommentar: Sehr flüssig gelesen"),
@@ -43,6 +44,7 @@ describe("RecordingRow", () => {
     render(
       <RecordingRow
         recording={makeRecording({ rating: null, comment: null })}
+        onStatusChange={vi.fn()}
       />,
     );
 
@@ -53,11 +55,40 @@ describe("RecordingRow", () => {
   it("rendert einen abspielbaren Inline-Player für das Recording", () => {
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mock-url");
 
-    const { container } = render(<RecordingRow recording={makeRecording()} />);
+    const { container } = render(
+      <RecordingRow recording={makeRecording()} onStatusChange={vi.fn()} />,
+    );
 
     const audio = container.querySelector("audio");
     expect(audio).not.toBeNull();
     expect(audio).toHaveAttribute("controls");
     expect(audio?.src).toMatch(/^blob:/);
+  });
+
+  it("meldet einen Statuswechsel mit recordingId und neuem Status zurück", async () => {
+    const user = userEvent.setup();
+    const onStatusChange = vi.fn();
+    render(
+      <RecordingRow
+        recording={makeRecording({
+          recordingId: "rec-1",
+          status: "unbewertet",
+        })}
+        onStatusChange={onStatusChange}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Unbewertet" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Bestanden" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Bestanden" }));
+
+    expect(onStatusChange).toHaveBeenCalledWith("rec-1", "bestanden");
   });
 });
