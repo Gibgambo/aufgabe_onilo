@@ -66,6 +66,11 @@ export interface VideoInput {
   cuePoints: number[];
 }
 
+export async function listVideos(): Promise<VideoRecord[]> {
+  const db = await getDb();
+  return db.getAll("videos");
+}
+
 export async function saveVideo(input: VideoInput): Promise<string> {
   const videoId = crypto.randomUUID();
   const db = await getDb();

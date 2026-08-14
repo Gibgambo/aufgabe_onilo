@@ -8,6 +8,7 @@ import {
   saveRecording,
   listRecordings,
   updateRecording,
+  listVideos,
 } from "./db";
 
 function makeFile(type: string, sizeBytes: number): File {
@@ -130,6 +131,31 @@ describe("saveRecording / listRecordings", () => {
 
     expect(recordingsForA).toHaveLength(1);
     expect(recordingsForA[0].studentName).toBe("Anna");
+  });
+});
+
+describe("listVideos", () => {
+  it("liefert alle gespeicherten Videos", async () => {
+    const videoIdA = await saveVideo({
+      name: "Video A",
+      mimeType: "video/mp4",
+      blob: new Blob(["a"], { type: "video/mp4" }),
+      cuePoints: [0],
+    });
+    const videoIdB = await saveVideo({
+      name: "Video B",
+      mimeType: "video/mp4",
+      blob: new Blob(["b"], { type: "video/mp4" }),
+      cuePoints: [0],
+    });
+
+    const videos = await listVideos();
+
+    expect(videos.map((v) => v.videoId)).toEqual(
+      expect.arrayContaining([videoIdA, videoIdB]),
+    );
+    expect(videos.find((v) => v.videoId === videoIdA)?.name).toBe("Video A");
+    expect(videos.find((v) => v.videoId === videoIdB)?.name).toBe("Video B");
   });
 });
 
