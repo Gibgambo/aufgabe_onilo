@@ -38,6 +38,20 @@ export function useRecording(videoId: string): UseRecordingResult {
     }
   }
 
+  function createRecorder(stream: MediaStream): MediaRecorder {
+    const mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        chunksRef.current.push(event.data);
+      }
+    };
+    mediaRecorder.onstop = () => {
+      stream.getTracks().forEach((track) => track.stop());
+      void saveChunks();
+    };
+    return mediaRecorder;
+  }
+
   async function start(studentName: string) {
     studentNameRef.current = studentName;
     setState({ status: "requesting-permission" });
@@ -52,19 +66,8 @@ export function useRecording(videoId: string): UseRecordingResult {
     }
 
     chunksRef.current = [];
-    const mediaRecorder = new MediaRecorder(stream);
-    mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0) {
-        chunksRef.current.push(event.data);
-      }
-    };
-    mediaRecorder.onstop = () => {
-      stream.getTracks().forEach((track) => track.stop());
-      void saveChunks();
-    };
-
-    mediaRecorderRef.current = mediaRecorder;
-    mediaRecorder.start();
+    mediaRecorderRef.current = createRecorder(stream);
+    mediaRecorderRef.current.start();
     setState({ status: "recording" });
   }
 

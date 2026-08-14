@@ -1,5 +1,4 @@
 import { useParams } from "react-router";
-import { useState } from "react";
 import {
   MediaPlayer,
   MediaProvider,
@@ -15,10 +14,8 @@ import "@vidstack/react/player/styles/base.css";
 import { useBoardstoryVideo } from "../player/useBoardstoryVideo";
 import { findNextCuePoint, findPreviousCuePoint } from "../domain/cuePoints";
 import type { VideoMimeType } from "@vidstack/react";
-import { useRecording } from "../player/useRecording";
-
-const controlButtonClass =
-  "flex h-16 w-16 items-center justify-center rounded-full bg-onilo-primary text-3xl text-white hover:bg-onilo-secondary";
+import { RecordingPanel } from "../player/RecordingPanel";
+import { controlButtonClass } from "../player/playerStyles";
 
 function StatusMessage({ text }: { text: string }) {
   return (
@@ -96,7 +93,7 @@ function Timeline() {
         </TimeSlider.Track>
         <TimeSlider.Thumb
           className="absolute top-1/2 left-(--slider-fill) h-7 w-7 -translate-x-1/2
-    -translate-y-1/2 rounded-full bg-onilo-accent shadow"
+      -translate-y-1/2 rounded-full bg-onilo-accent shadow"
         />
       </TimeSlider.Root>
       <div className="flex shrink-0 items-center gap-1 text-lg font-medium text-onilo-primary">
@@ -118,61 +115,9 @@ function VolumeControl() {
         </VolumeSlider.Track>
         <VolumeSlider.Thumb
           className="absolute top-1/2 left-(--slider-fill) h-7 w-7 -translate-x-1/2
-    -translate-y-1/2 rounded-full bg-onilo-accent shadow"
+      -translate-y-1/2 rounded-full bg-onilo-accent shadow"
         />
       </VolumeSlider.Root>
-    </div>
-  );
-}
-
-export function RecordingPanel({ videoId }: { videoId: string }) {
-  const [studentName, setStudentName] = useState("");
-  const { state, start, stop } = useRecording(videoId);
-  const isRecording = state.status === "recording";
-  const canStart = studentName.trim().length > 0 && state.status === "idle";
-
-  return (
-    <div className="flex w-full max-w-3xl flex-col items-center gap-3 rounded-xl bg-white p-6 shadow">
-      <label className="flex w-full max-w-sm flex-col gap-1 font-medium text-onilo-primary">
-        Wie lautet dein Name? 
-        <input
-          type="text"
-          value={studentName}
-          onChange={(event) => setStudentName(event.target.value)}
-          disabled={state.status !== "idle"}
-          className="rounded-lg border border-onilo-primary/30 bg-white px-3 py-2 text-black"
-        />
-      </label>
-
-      <button
-        type="button"
-        onClick={() => (isRecording ? stop() : start(studentName))}
-        disabled={!isRecording && !canStart}
-        className={controlButtonClass}
-        aria-label={isRecording ? "Aufnahme stoppen" : "Aufnahme starten"}
-      >
-        {isRecording ? "⏹" : "🎙"}
-      </button>
-
-      {isRecording && (
-        <p role="status" className="text-onilo-accent text-lg font-semibold">
-          ● Aufnahme läuft…
-        </p>
-      )}
-
-      {state.status === "permission-denied" && (
-        <p role="alert" className="text-onilo-accent text-lg font-medium">
-          Mikrofon-Zugriff wurde verweigert. Bitte erlaube den Zugriff in deinem
-          Browser, um eine Aufnahme zu starten.
-        </p>
-      )}
-
-      {state.status === "error" && (
-        <p role="alert" className="text-onilo-accent text-lg font-medium">
-          Die Aufnahme konnte nicht gespeichert werden. Bitte versuche es
-          erneut.
-        </p>
-      )}
     </div>
   );
 }

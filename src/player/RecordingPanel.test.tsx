@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { RecordingPanel } from "./Player";
-import * as useRecordingModule from "../player/useRecording";
-import type { RecordingState } from "../player/useRecording";
+import { RecordingPanel } from "./RecordingPanel";
+import * as useRecordingModule from "./useRecording";
+import type { RecordingState } from "./useRecording";
 
 function mockRecordingState(state: RecordingState) {
   const start = vi.fn();
@@ -42,12 +42,12 @@ describe("RecordingPanel", () => {
     ).toBeEnabled();
   });
 
-  it("startet die Aufnahme mit dem eingegebenen Namen", async () => {
+  it("startet die Aufnahme mit dem getrimmten Namen", async () => {
     const { start } = mockRecordingState({ status: "idle" });
     const user = userEvent.setup();
     render(<RecordingPanel videoId="video-1" />);
 
-    await user.type(screen.getByLabelText("Wie lautet dein Name?"), "Tim");
+    await user.type(screen.getByLabelText("Wie lautet dein Name?"), "  Tim  ");
     await user.click(screen.getByRole("button", { name: "Aufnahme starten" }));
 
     expect(start).toHaveBeenCalledWith("Tim");
@@ -72,5 +72,35 @@ describe("RecordingPanel", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Mikrofon-Zugriff wurde verweigert",
     );
+  });
+
+  it("erlaubt einen erneuten Versuch nach verweigerter Mikrofon-Erlaubnis", async () => {
+    mockRecordingState({ status: "permission-denied" });
+    const user = userEvent.setup();
+    render(<RecordingPanel videoId="video-1" />);
+
+    const input = screen.getByLabelText("Wie lautet dein Name?");
+    expect(input).toBeEnabled();
+
+    await user.type(input, "Tim");
+
+    expect(
+      screen.getByRole("button", { name: "Aufnahme starten" }),
+    ).toBeEnabled();
+  });
+
+  it("erlaubt einen erneuten Versuch nach einem Speicherfehler", async () => {
+    mockRecordingState({ status: "error" });
+    const user = userEvent.setup();
+    render(<RecordingPanel videoId="video-1" />);
+
+    const input = screen.getByLabelText("Wie lautet dein Name?");
+    expect(input).toBeEnabled();
+
+    await user.type(input, "Tim");
+
+    expect(
+      screen.getByRole("button", { name: "Aufnahme starten" }),
+    ).toBeEnabled();
   });
 });
