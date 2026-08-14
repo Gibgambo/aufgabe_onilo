@@ -16,6 +16,10 @@ export interface UseRecordingResult {
   stop: () => void;
 }
 
+function stopTracks(stream: MediaStream) {
+  stream.getTracks().forEach((track) => track.stop());
+}
+
 export function useRecording(videoId: string): UseRecordingResult {
   const [state, setState] = useState<RecordingState>({ status: "idle" });
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -32,7 +36,7 @@ export function useRecording(videoId: string): UseRecordingResult {
         // Browser onstop weiterhin automatisch feuern, sobald der Stream
         // inaktiv wird — und saveChunks() liefe trotzdem noch
         recorder.onstop = null;
-        recorder.stream.getTracks().forEach((track) => track.stop());
+        stopTracks(recorder.stream);
       }
     };
   }, []);
@@ -61,7 +65,7 @@ export function useRecording(videoId: string): UseRecordingResult {
       }
     };
     mediaRecorder.onstop = () => {
-      stream.getTracks().forEach((track) => track.stop());
+      stopTracks(stream);
       void saveChunks();
     };
     return mediaRecorder;
@@ -84,7 +88,7 @@ export function useRecording(videoId: string): UseRecordingResult {
       stream.getTracks().forEach((track) => track.stop());
       return;
     }
-    
+
     chunksRef.current = [];
     mediaRecorderRef.current = createRecorder(stream);
     mediaRecorderRef.current.start();
