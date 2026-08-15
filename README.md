@@ -45,7 +45,29 @@ flowchart TD
 
 ## Tech-Stack
 
-Aufbauend auf React + Vite ([ADR-0002](./docs/adr/0002-react-vite-frontend.md)):
+**Frontend-Framework: React + Vite** ([ADR-0002](./docs/adr/0002-react-vite-frontend.md)) — als CSR-SPA mit
+`react-router` für die drei Routen, ohne SSR (folgt aus ADR-0001, kein Backend). Ausschlaggebend waren
+Entwickler-Vertrautheit und das größere Ökosystem, um das Risiko im 3-Tage-Rahmen zu senken.
+
+- _Ehrlich eingeordnet:_ Technisch wäre **Svelte + Vite** für die Zielhardware (teils schwache Schulrechner) die
+  pragmatischere Wahl gewesen — Svelte kompiliert ohne VDOM-Runtime, in vergleichbaren Benchmarks ~47 KB gegenüber
+  ~156 KB für React 19 (Faktor ~3 weniger JS). Bewusst trotzdem gegen die technisch überlegene Option entschieden,
+  weil React-Vertrautheit + Ökosystem das Zeitrisiko in 3 Tagen stärker senkt als der Bundle-Vorteil von Svelte den
+  Nutzer:innen bringt. Details und weitere verworfene Optionen (SolidJS, Vue, Next.js, Nuxt) in ADR-0002.
+
+**Videoformat: MP4 (H.264) / WebM (VP9)** ([ADR-0003](./docs/adr/0003-video-state-handoff-indexeddb-url-param.md)) —
+das sind die Container/Codecs, die natives HTML5-`<video>`/Vidstack browserübergreifend zuverlässig abspielen. Der
+Upload wird deshalb per MIME-Type-Whitelist auf diese Formate geprüft, bevor der Blob in IndexedDB geschrieben wird —
+primär ein UX-Guard (klare Fehlermeldung sofort statt leerem/kaputtem Player), nicht als hartes Security-Boundary
+gedacht, da `file.type` clientseitig gemeldet und nicht vertrauenswürdig ist (Details und Grenzen in ADR-0003).
+
+**State-Management: URL-Param + IndexedDB statt globalem Store**
+([ADR-0003](./docs/adr/0003-video-state-handoff-indexeddb-url-param.md)) — der einzige routenübergreifende State ist
+die `videoId`; die steht als `/player/:videoId` direkt in der Adresszeile (`useParams()`), überlebt Reload und
+direkten Linkaufruf gratis, ohne Store/Provider/Persistenz-Middleware. Player-Controls (`currentTime`, `volume`,
+`isRecording`) bleiben lokaler Component-State. Verworfen: Zustand/Jotai (zusätzliche Maschinerie für ein
+Ein-Wert-Problem, das die URL bereits löst) und React Context (re-rendert bei jeder Änderung alle Consumer — Risiko
+für `currentTime`, das sich pro Frame ändert).
 
 **Player-Framework: [Vidstack](https://vidstack.io/)** (`@vidstack/react`) — bringt barrierearme, headless
 Player-Primitives (Play/Mute-Buttons, Time-/Volume-Slider) mit, auf denen die Kapitel-Navigation über Cue-Points
@@ -82,17 +104,23 @@ Vites Config/Transform-Pipeline (kein separates Jest-Setup, kein Babel/ts-jest-U
 ## Aufwandsschätzung
 
 Aufteilung des 3-Tage-Rahmens nach Funktionsbereich, mit Bezug auf die zugehörigen Tickets in Github
-([#1](../../issues/1)-[#9](../../issues/9)):
+([#1](../../issues/1)-[#16](../../issues/16)):
 
-| Bereich                                                           | Tickets | Aufwand    | Status                    |
-| ----------------------------------------------------------------- | ------- | ---------- | ------------------------- |
-| Setup & Architektur-Grundlage (Scaffold, Routing, Tailwind, ADRs) | #1, #2  | 0,5 Tag    | ✅ erledigt               |
-| Editor: Upload & Validierung                                      | #3, #4  | 0,5 Tag    | ✅ erledigt               |
-| Player: Vidstack-Integration, Cue-Point-Navigation                | #5      | 0,5 Tag    | ✅ erledigt               |
-| Recording: Aufnahme-Flow, IndexedDB-Persistenz                    | #6      | 0,5 Tag    | ✅ erledigt               |
-| Recordings-Dashboard: Filtern, Sortieren, Bewertung               | #7      | 0,5 Tag    | ✅ erledigt               |
-| Doku (dieses README) & Polish (Ladezustand für Routen-Chunks)     | #8, #9  | 0,5 Tag    | 🔄 #8 in Arbeit, #9 offen |
-| **Gesamt**                                                        |         | **3 Tage** |                           |
+| Bereich                                                                       | Tickets            | Aufwand    | Status      |
+| ------------------------------------------------------------------------------ | ------------------ | ---------- | ----------- |
+| Setup & Architektur-Grundlage (Scaffold, Routing, Tailwind, ADRs)             | #1, #2             | 0,5 Tag    | ✅ erledigt |
+| Editor: Upload & Validierung                                                  | #3, #4             | 0,5 Tag    | ✅ erledigt |
+| Player: Vidstack-Integration, Cue-Point-Navigation                           | #5                  | 0,5 Tag    | ✅ erledigt |
+| Recording: Aufnahme-Flow, IndexedDB-Persistenz                               | #6                  | 0,5 Tag    | ✅ erledigt |
+| Recordings-Dashboard: Filtern, Sortieren, Bewertung                          | #7                  | 0,5 Tag    | ✅ erledigt |
+| Doku (README) & Polish (Ladezustand für Routen-Chunks)                       | #8, #9              | 0,5 Tag    | ✅ erledigt |
+| Navigation & Boardstory-Übersicht (Kopfzeile, erneutes Öffnen), Bugfixes     | #10, #11, #12, #13 | 0,5 Tag    | ✅ erledigt |
+| Visuelles Redesign (Icons, Fonts, Fullscreen, Aufnahme-Modal)                | #14, #15, #16       | 0,5 Tag    | ✅ erledigt |
+| **Gesamt**                                                                    |                     | **4 Tage**  |             |
+
+Die ursprüngliche Schätzung vor Beginn lag bei 3 Tagen (#1-#9, Zeilen 1-6). Navigation/Boardstory-Übersicht und das
+visuelle Redesign (#10-#16) kamen als zusätzliche Polish-Runden innerhalb des 3-Tage-Zeitrahmens dazu und überschreiten
+die ursprüngliche Schätzung um rund einen halben Tag — offen kommuniziert statt die Tabelle nachträglich glattzuziehen.
 
 ## Setup
 
