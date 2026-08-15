@@ -15,7 +15,9 @@ import "@vidstack/react/player/styles/base.css";
 import { useBoardstoryVideo } from "../player/useBoardstoryVideo";
 import { findNextCuePoint, findPreviousCuePoint } from "../domain/cuePoints";
 import type { VideoMimeType } from "@vidstack/react";
-import { RecordingPanel } from "../player/RecordingPanel";
+import { RecordingControl } from "../player/RecordingControl";
+import { RecordingStatusLine } from "../player/RecordingStatusLine";
+import { useRecordingControl } from "../player/useRecordingControl";
 import {
   ghostControlButtonClass,
   primaryControlButtonClass,
@@ -189,6 +191,7 @@ function VolumeControl() {
 export function Player() {
   const { videoId } = useParams<{ videoId: string }>();
   const state = useBoardstoryVideo(videoId ?? "");
+  const recording = useRecordingControl(videoId ?? "");
 
   return (
     <div className="min-h-screen bg-onilo-background flex flex-col items-center gap-5 px-4 pt-8 pb-16 sm:px-8">
@@ -209,35 +212,35 @@ export function Player() {
       )}
 
       {state.status === "ready" && (
-        <>
-          <MediaPlayer
-            src={{ src: state.videoUrl, type: state.mimeType as VideoMimeType }}
-            playsInline
-            className="bg-onilo-stage flex w-full max-w-6xl flex-col overflow-hidden rounded-[28px] shadow-xl"
-          >
-            {/* Matches the rounded-[28px] on the MediaPlayer wrapper below; must stay in sync. */}
-            <MediaProvider style={{ borderRadius: "28px 28px 0 0" }} />
-            <div className="flex flex-col gap-6 p-5 sm:p-7">
-              <Timeline cuePoints={state.cuePoints} />
-              <div className="flex flex-wrap items-center justify-center gap-4 sm:justify-between">
-                <div className="hidden sm:block sm:w-24" aria-hidden="true" />
-                <div className="flex items-center gap-4">
-                  <ChapterButton
-                    cuePoints={state.cuePoints}
-                    direction="previous"
-                  />
-                  <PlayPauseButton />
-                  <ChapterButton cuePoints={state.cuePoints} direction="next" />
-                </div>
-                <div className="flex items-center gap-3">
-                  <VolumeControl />
-                  <FullscreenToggleButton />
-                </div>
+        <MediaPlayer
+          src={{ src: state.videoUrl, type: state.mimeType as VideoMimeType }}
+          playsInline
+          className="bg-onilo-stage flex w-full max-w-6xl flex-col overflow-hidden rounded-[28px] shadow-xl"
+        >
+          {/* Matches the rounded-[28px] on the MediaPlayer wrapper below; must stay in sync. */}
+          <MediaProvider style={{ borderRadius: "28px 28px 0 0" }} />
+          <div className="flex flex-col gap-6 p-5 sm:p-7">
+            <Timeline cuePoints={state.cuePoints} />
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:justify-between">
+              <div className="flex items-center gap-4 sm:w-24">
+                <RecordingControl {...recording} />
+              </div>
+              <div className="flex items-center gap-4">
+                <ChapterButton
+                  cuePoints={state.cuePoints}
+                  direction="previous"
+                />
+                <PlayPauseButton />
+                <ChapterButton cuePoints={state.cuePoints} direction="next" />
+              </div>
+              <div className="flex items-center gap-3">
+                <VolumeControl />
+                <FullscreenToggleButton />
               </div>
             </div>
-          </MediaPlayer>
-          <RecordingPanel videoId={videoId ?? ""} />
-        </>
+            <RecordingStatusLine state={recording.state} />
+          </div>
+        </MediaPlayer>
       )}
     </div>
   );

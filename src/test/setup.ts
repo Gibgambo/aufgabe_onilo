@@ -9,6 +9,28 @@ if (typeof indexedDB === "undefined") {
   );
 }
 
+// jsdom implementiert <dialog> nicht (showModal/close fehlen).
+if (
+  typeof HTMLDialogElement !== "undefined" &&
+  !HTMLDialogElement.prototype.showModal
+) {
+  HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
+    this.setAttribute("open", "");
+  };
+}
+if (
+  typeof HTMLDialogElement !== "undefined" &&
+  !HTMLDialogElement.prototype.close
+) {
+  HTMLDialogElement.prototype.close = function (this: HTMLDialogElement) {
+    if (!this.hasAttribute("open")) {
+      return;
+    }
+    this.removeAttribute("open");
+    this.dispatchEvent(new Event("close"));
+  };
+}
+
 afterEach(() => {
   cleanup();
 });
