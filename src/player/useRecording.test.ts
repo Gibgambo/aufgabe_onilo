@@ -1,3 +1,4 @@
+import { StrictMode } from "react";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useRecording } from "./useRecording";
@@ -53,6 +54,21 @@ describe("useRecording", () => {
     getUserMedia.mockResolvedValue(makeFakeStream());
 
     const { result } = renderHook(() => useRecording("video-1"));
+    await act(async () => {
+      result.current.start("Tim");
+    });
+
+    await waitFor(() => expect(result.current.state.status).toBe("recording"));
+  });
+
+  it("wechselt zu recording, auch nachdem StrictMode den Mount-Effect doppelt ausgeführt hat", async () => {
+    vi.stubGlobal("MediaRecorder", FakeMediaRecorder);
+    const getUserMedia = stubGetUserMedia();
+    getUserMedia.mockResolvedValue(makeFakeStream());
+
+    const { result } = renderHook(() => useRecording("video-1"), {
+      wrapper: StrictMode,
+    });
     await act(async () => {
       result.current.start("Tim");
     });

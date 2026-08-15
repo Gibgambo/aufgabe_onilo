@@ -222,7 +222,7 @@ export function Player() {
           <div className="flex flex-col gap-6 p-5 sm:p-7">
             <Timeline cuePoints={state.cuePoints} />
             <div className="flex flex-wrap items-center justify-center gap-4 sm:justify-between">
-              <div className="flex items-center gap-4 sm:w-24">
+              <div className="flex items-center gap-4">
                 <RecordingControl {...recording} />
               </div>
               <div className="flex items-center gap-4">

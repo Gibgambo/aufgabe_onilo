@@ -3,6 +3,16 @@ import { describe, expect, it } from "vitest";
 import { RecordingStatusLine } from "./RecordingStatusLine";
 
 describe("RecordingStatusLine", () => {
+  it("zeigt einen Hinweis, während auf die Mikrofon-Freigabe gewartet wird", () => {
+    render(
+      <RecordingStatusLine state={{ status: "requesting-permission" }} />,
+    );
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Warte auf Mikrofon-Freigabe",
+    );
+  });
+
   it("zeigt einen Hinweis während der Aufnahme", () => {
     render(<RecordingStatusLine state={{ status: "recording" }} />);
 

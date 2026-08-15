@@ -4,6 +4,14 @@ const statusTextClass = "font-display text-center text-base font-semibold";
 const alertTextClass = "text-center text-sm font-medium";
 
 export function RecordingStatusLine({ state }: { state: RecordingState }) {
+  if (state.status === "requesting-permission") {
+    return (
+      <p role="status" className={`text-onilo-primary ${statusTextClass}`}>
+        Warte auf Mikrofon-Freigabe im Browser…
+      </p>
+    );
+  }
+
   if (state.status === "recording") {
     return (
       <p role="status" className={`text-onilo-accent ${statusTextClass}`}>

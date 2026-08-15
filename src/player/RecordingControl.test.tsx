@@ -63,9 +63,22 @@ describe("RecordingControl", () => {
       screen.queryByRole("button", { name: "Aufnahme starten" }),
     ).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Aufnahme stoppen" }));
+    const stopButton = screen.getByRole("button", {
+      name: "Aufnahme stoppen",
+    });
+    expect(stopButton).toHaveTextContent("Aufnahme stoppen");
+
+    await user.click(stopButton);
 
     expect(stop).toHaveBeenCalled();
+  });
+
+  it("zeigt den Beschriftungstext 'Aufnahme starten', wenn nicht aufgenommen wird", () => {
+    renderControl({ status: "idle" });
+
+    expect(
+      screen.getByRole("button", { name: "Aufnahme starten" }),
+    ).toHaveTextContent("Aufnahme starten");
   });
 
   it("öffnet nach einem Fehler erneut das Modal mit leerem Namensfeld", async () => {

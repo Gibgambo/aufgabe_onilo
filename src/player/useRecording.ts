@@ -28,6 +28,10 @@ export function useRecording(videoId: string): UseRecordingResult {
   const isMountedRef = useRef(true);
 
   useEffect(() => {
+    // React StrictMode ruft Effects im Dev-Modus einmal mount→cleanup→mount
+    // durch; ohne dieses Reset bliebe isMountedRef nach dem simulierten
+    // Unmount dauerhaft false, obwohl die Komponente noch lebt.
+    isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
       const recorder = mediaRecorderRef.current;
