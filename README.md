@@ -124,6 +124,8 @@ Aufnahme-Modal — #14, #15, #16).
 
 ## Setup
 
+Node.js `^20.19.0 || >=22.12.0` (Vite-8-Anforderung)
+
 npm install
 npm run dev
 
