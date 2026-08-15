@@ -114,13 +114,13 @@ Aufteilung des 3-Tage-Rahmens nach Funktionsbereich, mit Bezug auf die zugehöri
 | Recording: Aufnahme-Flow, IndexedDB-Persistenz                               | #6                  | 0,5 Tag    | ✅ erledigt |
 | Recordings-Dashboard: Filtern, Sortieren, Bewertung                          | #7                  | 0,5 Tag    | ✅ erledigt |
 | Doku (README) & Polish (Ladezustand für Routen-Chunks)                       | #8, #9              | 0,5 Tag    | ✅ erledigt |
-| Navigation & Boardstory-Übersicht (Kopfzeile, erneutes Öffnen), Bugfixes     | #10, #11, #12, #13 | 0,5 Tag    | ✅ erledigt |
-| Visuelles Redesign (Icons, Fonts, Fullscreen, Aufnahme-Modal)                | #14, #15, #16       | 0,5 Tag    | ✅ erledigt |
-| **Gesamt**                                                                    |                     | **4 Tage**  |             |
+| **Gesamt (ursprüngliche Schätzung)**                                          |                     | **3 Tage**  |             |
 
-Die ursprüngliche Schätzung vor Beginn lag bei 3 Tagen (#1-#9, Zeilen 1-6). Navigation/Boardstory-Übersicht und das
-visuelle Redesign (#10-#16) kamen als zusätzliche Polish-Runden innerhalb des 3-Tage-Zeitrahmens dazu und überschreiten
-die ursprüngliche Schätzung um rund einen halben Tag — offen kommuniziert statt die Tabelle nachträglich glattzuziehen.
+Zusätzlich zur ursprünglichen Schätzung wurden im selben 3-Tage-Zeitfenster (erster Commit 12.08. 12:47 Uhr, letzter
+Commit 15.08. 03:26 Uhr, vor der Abgabefrist 15.08. 12:30 Uhr) zwei weitere Runden umgesetzt, ohne den Rahmen zu
+überschreiten: **Navigation & Boardstory-Übersicht** (Kopfzeile, erneutes Öffnen hochgeladener Boardstories,
+Recording-Cleanup-Bugfix — #10, #11, #12, #13) und **visuelles Redesign** (Icons, eigene Fonts, Fullscreen,
+Aufnahme-Modal — #14, #15, #16).
 
 ## Setup
 
