@@ -169,15 +169,6 @@ function Timeline({ cuePoints }: { cuePoints: number[] }) {
   );
 }
 
-function VideoStage() {
-  const isFullscreen = useMediaState("fullscreen");
-  return (
-    <MediaProvider
-      style={{ borderRadius: isFullscreen ? "28px" : "28px 28px 0 0" }}
-    />
-  );
-}
-
 function VolumeControl() {
   return (
     <div className="flex items-center gap-3">
@@ -191,7 +182,6 @@ function VolumeControl() {
       -translate-y-1/2 rounded-full bg-white shadow"
         />
       </VolumeSlider.Root>
-      <FullscreenToggleButton />
     </div>
   );
 }
@@ -225,7 +215,8 @@ export function Player() {
             playsInline
             className="bg-onilo-stage flex w-full max-w-6xl flex-col overflow-hidden rounded-[28px] shadow-xl"
           >
-            <VideoStage />
+            {/* Matches the rounded-[28px] on the MediaPlayer wrapper below; must stay in sync. */}
+            <MediaProvider style={{ borderRadius: "28px 28px 0 0" }} />
             <div className="flex flex-col gap-6 p-5 sm:p-7">
               <Timeline cuePoints={state.cuePoints} />
               <div className="flex flex-wrap items-center justify-center gap-4 sm:justify-between">
@@ -238,7 +229,10 @@ export function Player() {
                   <PlayPauseButton />
                   <ChapterButton cuePoints={state.cuePoints} direction="next" />
                 </div>
-                <VolumeControl />
+                <div className="flex items-center gap-3">
+                  <VolumeControl />
+                  <FullscreenToggleButton />
+                </div>
               </div>
             </div>
           </MediaPlayer>
