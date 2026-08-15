@@ -67,6 +67,28 @@ export function MuteIcon({ className }: IconProps) {
   );
 }
 
+export function EnterFullscreenIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="M9 4H5a1 1 0 0 0-1 1v4" />
+      <path d="M15 4h4a1 1 0 0 1 1 1v4" />
+      <path d="M9 20H5a1 1 0 0 1-1-1v-4" />
+      <path d="M15 20h4a1 1 0 0 0 1-1v-4" />
+    </svg>
+  );
+}
+
+export function ExitFullscreenIcon({ className }: IconProps) {
+  return (
+    <svg {...shared} className={className}>
+      <path d="M4 9h4a1 1 0 0 0 1-1V4" />
+      <path d="M20 9h-4a1 1 0 0 1-1-1V4" />
+      <path d="M4 15h4a1 1 0 0 1 1 1v4" />
+      <path d="M20 15h-4a1 1 0 0 0-1 1v4" />
+    </svg>
+  );
+}
+
 export function MicIcon({ className }: IconProps) {
   return (
     <svg {...shared} className={className}>

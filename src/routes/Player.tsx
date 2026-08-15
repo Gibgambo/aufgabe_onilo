@@ -1,5 +1,6 @@
 import { useParams } from "react-router";
 import {
+  FullscreenButton,
   MediaPlayer,
   MediaProvider,
   MuteButton,
@@ -21,6 +22,8 @@ import {
   secondaryControlButtonClass,
 } from "../player/playerStyles";
 import {
+  EnterFullscreenIcon,
+  ExitFullscreenIcon,
   MuteIcon,
   NextChapterIcon,
   PauseIcon,
@@ -61,6 +64,22 @@ function MuteToggleButton() {
     >
       {isMuted ? <MuteIcon className="h-7 w-7" /> : <VolumeIcon className="h-7 w-7" />}
     </MuteButton>
+  );
+}
+
+function FullscreenToggleButton() {
+  const isFullscreen = useMediaState("fullscreen");
+  return (
+    <FullscreenButton
+      className={ghostControlButtonClass}
+      aria-label={isFullscreen ? "Vollbild beenden" : "Vollbild"}
+    >
+      {isFullscreen ? (
+        <ExitFullscreenIcon className="h-7 w-7" />
+      ) : (
+        <EnterFullscreenIcon className="h-7 w-7" />
+      )}
+    </FullscreenButton>
   );
 }
 
@@ -150,6 +169,15 @@ function Timeline({ cuePoints }: { cuePoints: number[] }) {
   );
 }
 
+function VideoStage() {
+  const isFullscreen = useMediaState("fullscreen");
+  return (
+    <MediaProvider
+      style={{ borderRadius: isFullscreen ? "28px" : "28px 28px 0 0" }}
+    />
+  );
+}
+
 function VolumeControl() {
   return (
     <div className="flex items-center gap-3">
@@ -163,6 +191,7 @@ function VolumeControl() {
       -translate-y-1/2 rounded-full bg-white shadow"
         />
       </VolumeSlider.Root>
+      <FullscreenToggleButton />
     </div>
   );
 }
@@ -196,7 +225,7 @@ export function Player() {
             playsInline
             className="bg-onilo-stage flex w-full max-w-6xl flex-col overflow-hidden rounded-[28px] shadow-xl"
           >
-            <MediaProvider />
+            <VideoStage />
             <div className="flex flex-col gap-6 p-5 sm:p-7">
               <Timeline cuePoints={state.cuePoints} />
               <div className="flex flex-wrap items-center justify-center gap-4 sm:justify-between">
